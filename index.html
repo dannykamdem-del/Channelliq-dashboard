@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ChannelIQ</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/recharts@2.8.0/umd/Recharts.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #f1f5f9; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+const { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } = Recharts;
+
+const SERVER  = "https://channelliq-server-production.up.railway.app";
+const API_KEY = "AIzaSyCmhyCF9ABYDZwzhVHmVzObU0S2QyJ0smM";
+const CHAN_ID  = "UCDmAUX3C22nuBhcx96Ur8Rg";
+
+const api = {
+  channel:  ()        => fetch(`${SERVER}/channel?apiKey=${API_KEY}&channelId=${CHAN_ID}`).then(r=>r.json()),
+  videos:   ()        => fetch(`${SERVER}/videos?apiKey=${API_KEY}&channelId=${CHAN_ID}`).then(r=>r.json()),
+  comments: (videoId) => fetch(`${SERVER}/comments?apiKey=${API_KEY}&videoId=${videoId}`).then(r=>r.json()),
+};
+
+async function analyseSentiment(comments) {
+  const sample = comments.slice(0,150).map(c=>c.text).join("\n---\n");
+  const res = await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    bo

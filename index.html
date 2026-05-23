@@ -108,21 +108,15 @@ async function apiFetch(path) {
 }
 
 async function analyseSentiment(comments) {
-  const sample = comments.slice(0,150).map(c=>c.text).join("\n---\n");
-  const res = await fetch("https://api.anthropic.com/v1/messages",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      model:"claude-sonnet-4-20250514",
-      max_tokens:1200,
-      messages:[{role:"user",content:`Analyse these YouTube comments and return ONLY valid JSON with no markdown or extra text:\n\n${sample}\n\nReturn exactly:\n{"positive":<0-100>,"neutral":<0-100>,"negative":<0-100>,"themes":[{"theme":"<name>","sentiment":"positive|neutral|negative|mixed","count":<int>,"examples":["<q>","<q>","<q>"]}],"summary":"<2-3 sentences>","quickWins":["<action>","<action>","<action>"]}`}]
-    })
+  const res = await fetch(`${SERVER}/sentiment`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ comments })
   });
-  const d = await res.json();
-  const raw=(d.content||[]).map(b=>b.text||"").join("");
-  return JSON.parse(raw.replace(/```json|```/g,"").trim());
+  if (!res.ok) throw new Error(`Sentiment error ${res.status}`);
+  return res.json();
 }
-
+  
 function setStatus(msg) {
   state.status = msg;
   const el = document.getElementById("status");

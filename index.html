@@ -301,7 +301,12 @@ async function runSentiment(data) {
 async function openVideo(video) {
   state.selectedVideo=video; state.videoSentiment=null; state.videoComments=[];
   state.screen="videodetail"; render();
-  state.busy=true; state.status=`Loading comments...`; render();
+}
+
+async function runVideoSentiment() {
+  const video=state.selectedVideo;
+  if (!video||state.busy) return;
+  state.busy=true; state.status="Fetching comments..."; render();
   try {
     const r=await fetch(`${SERVER}/comments?videoId=${video.id}`);
     const d=await r.json();
@@ -311,15 +316,13 @@ async function openVideo(video) {
       comments.push({videoId:video.id,videoTitle:video.snippet.title,text:top.textDisplay,likes:top.likeCount,author:top.authorDisplayName});
     });
     state.videoComments=comments;
-    state.status=`${comments.length} comments loaded ✓`; state.busy=false; render();
-    if (comments.length) {
-      state.busy=true; state.status="Running AI analysis..."; render();
-      const sr=await fetch(`${SERVER}/sentiment`,{
-        method:"POST", headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({ comments, goal:state.goal||"", creatorType:state.creatorType||"" })
-      });
-      if (sr.ok) { state.videoSentiment=await sr.json(); state.status="Analysis complete ✓"; }
-    }
+    if (!comments.length) { state.status="No comments found"; state.busy=false; render(); return; }
+    state.status="Running AI analysis..."; render();
+    const sr=await fetch(`${SERVER}/sentiment`,{
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({ comments, goal:state.goal||"", creatorType:state.creatorType||"" })
+    });
+    if (sr.ok) { state.videoSentiment=await sr.json(); state.status="Analysis complete ✓"; }
   } catch(e) { state.status="Error: "+e.message; }
   state.busy=false; render();
 }
@@ -545,9 +548,20 @@ function renderVideoDetail() {
           <div class="stat-box"><div class="stat-val" style="color:#f59e0b">${fmt(comms)}</div><div class="stat-lbl">Comments</div></div>
           <div class="stat-box"><div class="stat-val" style="color:${ec}">${eng}%</div><div class="stat-lbl">Engagement</div></div>
         </div>
-        ${state.busy?`<div style="text-align:center;padding:40px 20px"><div style="font-size:28px;margin-bottom:10px">🤖</div><div style="font-size:14px;font-weight:600;color:#0f172a;margin-bottom:6px">Analysing comments...</div><div style="font-size:12px;color:#64748b">${state.status}</div></div>`:""}
-        ${!state.busy&&state.videoSentiment?sentimentBlock(state.videoSentiment):""}
-        ${!state.busy&&!state.videoSentiment&&state.videoComments.length===0?`<div class="empty"><div class="empty-icon">💬</div><div class="empty-title">No comments found</div><div class="empty-text">This video may have comments disabled.</div></div>`:""}
+        ${state.busy?`
+          <div style="text-align:center;padding:40px 20px">
+            <div style="font-size:28px;margin-bottom:10px">🤖</div>
+            <div style="font-size:14px;font-weight:600;color:#0f172a;margin-bottom:6px">${state.status}</div>
+          </div>`:`
+          ${!state.videoSentiment?`
+            <div class="dark-card" style="text-align:center;padding:28px 20px">
+              <div style="font-size:28px;margin-bottom:10px">🤖</div>
+              <div style="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:6px">Run AI Sentiment Analysis</div>
+              <div style="font-size:12px;color:#64748b;margin-bottom:18px;line-height:1.6">Analyse comments on this video — themes, audience personality, strengths and quick wins.</div>
+              <button class="btn" onclick="runVideoSentiment()">Run analysis →</button>
+            </div>`
+          :sentimentBlock(state.videoSentiment)}
+        `}
       </div>
     </div>`;
 }

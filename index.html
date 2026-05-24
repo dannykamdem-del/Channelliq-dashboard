@@ -743,44 +743,30 @@ function resetAll() {
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 async function init() {
-  const loadingTimeout = setTimeout(()=>{
-    if (state.screen==="loading") { state.screen="onboard"; state.error="Connection timed out. Please try again."; render(); }
-  }, 8000);
+  // Always start on onboard — never hang on loading screen
+  const savedHandle = localStorage.getItem("channeliq_handle");
+  if (savedHandle) state.handle = savedHandle;
+  state.screen = "onboard";
+  render();
+
+  // Check session quietly in background
   try {
     const { data:{ session } } = await sb.auth.getSession();
-    const savedHandle = localStorage.getItem("channeliq_handle");
-    const rememberMe = localStorage.getItem("channeliq_remember")==="true";
     if (session) {
-      state.user=session.user;
+      state.user = session.user;
       await loadGoals();
-      if (savedHandle && rememberMe) {
-        state.handle=savedHandle; state.screen="loading"; render();
-        await loadChannel(savedHandle);
-      } else {
-        if (savedHandle) state.handle=savedHandle;
-        state.screen="onboard"; render();
-      }
-    } else {
-      if (savedHandle) state.handle=savedHandle;
-      state.screen="onboard"; render();
+      render(); // re-render onboard with user context if needed
     }
-  } catch(e) { state.screen="onboard"; render(); }
-  finally { clearTimeout(loadingTimeout); }
+  } catch(e) { /* stay on onboard */ }
 
   sb.auth.onAuthStateChange(async (event, session) => {
     if (event==="SIGNED_IN" && session) {
       state.user=session.user;
       await loadGoals();
+      // After Google redirect — load channel if handle is saved
       const h=localStorage.getItem("channeliq_handle");
-      const remember=localStorage.getItem("channeliq_remember")==="true";
-      if (state.backgroundData && h && remember) {
-        state.channel=state.backgroundData.channel;
-        state.videos=state.backgroundData.videos;
-        state.tier=getTier(parseInt(state.channel.statistics?.subscriberCount||0));
-        state.status=`${state.videos.length} videos loaded ✓`;
-        state.screen="dashboard"; state.busy=false; render();
-      } else if (h && remember) { state.handle=h; await loadChannel(h); }
-      else { if (h) state.handle=h; state.screen="onboard"; render(); }
+      if (h) { state.handle=h; await loadChannel(h); }
+      else { state.screen="onboard"; render(); }
     }
     if (event==="SIGNED_OUT") {
       state.user=null; state.channel=null; state.videos=[];
@@ -826,9 +812,11 @@ async function signOut() { await sb.auth.signOut(); }
 
 async function loadChannel(handle) {
   state.status="Loading your channel..."; state.screen="loading"; render();
-  const t = setTimeout(()=>{ if(state.screen==="loading"){ state.error="Could not load channel. Please check your handle and try again."; state.screen="onboard"; render(); } }, 10000);
   try {
-    const r=await fetch(`${SERVER}/lookup?handle=${encodeURIComponent(handle)}`);
+    const controller = new AbortController();
+    const t = setTimeout(()=>controller.abort(), 7000);
+    const r=await fetch(`${SERVER}/lookup?handle=${encodeURIComponent(handle)}`, {signal:controller.signal});
+    clearTimeout(t);
     const d=await r.json();
     if (d.error) throw new Error(d.error);
     state.channel=d; state.tier=getTier(parseInt(d.statistics?.subscriberCount||0));
@@ -839,9 +827,9 @@ async function loadChannel(handle) {
     state.screen="dashboard"; state.busy=false; render();
     scheduleGoalPrompt();
   } catch(e) {
-    state.error=e.message||"Connection failed. Please try again.";
-    state.screen="onboard"; render();
-  } finally { clearTimeout(t); }
+    const msg = e.name==="AbortError" ? "Server took too long. Please try again." : e.message||"Connection failed. Please try again.";
+    state.error=msg; state.screen="onboard"; render();
+  }
 }
 
 async function fetchComments() {
@@ -1144,4 +1132,14 @@ function renderDashboard() {
           ${!comments.length&&!busy?`<button class="btn" onclick="fetchComments()">Fetch comments &amp; run AI sentiment →</button>`:""}
           ${busy?`<span style="font-size:13px;color:#94a3b8">${status}</span>`:""}
           ${comments.length&&!busy?`<span style="font-size:13px;color:#10b981;font-weight:600">✓ ${comments.length} comments${sentiment?" · Sentiment ready":""}</span>`:""}
-        </di
+        </div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#64748b;margin-bottom:8px">KPIs</div>
+        <div class="kpi-grid">${kpis.map(k=>`<div class="kpi-card" style="border-left:4px solid ${k.color}"><div class="kpi-label">${k.icon} ${k.label}</div><div class="kpi-value" style="color:${k.color}">${k.value}</div><div class="kpi-note">${k.note}</div></div>`).join("")}</div>
+        <div class="tabs">${["overview","videos","comments","sentiment","advanced"].map(t=>`<button class="tab ${tab===t?"active":""}" onclick="setTab('${t}')">${t==="advanced"?"📊 advanced":t}${t==="sentiment"&&sentiment?" ✓":""}</button>`).join("")}</div>
+        <div>${tabContent[tab]||""}</div>
+      </div>
+    </div>`;
+}
+
+function render() {
+  if (state.screen==="loading") { docum

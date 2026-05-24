@@ -125,8 +125,9 @@ body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; 
 .empty-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
 .empty-text { font-size: 12px; color: #64748b; margin-bottom: 18px; }
 .status-pill { font-size: 10px; color: #475569; background: #1e293b; padding: 3px 8px; border-radius: 20px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 120px; margin-top: 8px; }
-.bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; }
+.bar-chart-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 8px; padding-bottom: 4px; }
+.bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 120px; min-width: max-content; }
+.bar-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; width: 44px; flex-shrink: 0; }
 .bar { width: 100%; border-radius: 4px 4px 0 0; min-height: 2px; }
 .bar-lbl { font-size: 8px; color: #94a3b8; text-align: center; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .signout-btn { background: #1e293b; color: #64748b; border: none; border-radius: 8px; padding: 4px 10px; font-size: 11px; cursor: pointer; font-family: inherit; }
@@ -190,12 +191,14 @@ body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; 
 
 /* ── GOAL FLOW OVERLAY ── */
 .goal-overlay {
-  position: fixed; inset: 0; z-index: 200;
-  background: rgba(15,23,42,0.95);
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200;
+  background: rgba(15,23,42,0.98);
   display: flex; flex-direction: column;
   overflow-y: auto;
+  width: 100vw;
+  -webkit-overflow-scrolling: touch;
 }
-.goal-flow { max-width: 480px; margin: 0 auto; padding: 24px 20px 40px; width: 100%; }
+.goal-flow { width: 100%; max-width: 480px; margin: 0 auto; padding: 24px 20px 40px; box-sizing: border-box; }
 .goal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
 .goal-header-left { display: flex; align-items: center; gap: 10px; }
 .goal-logo-box { width: 28px; height: 28px; background: #ef4444; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: white; }
@@ -824,7 +827,7 @@ function renderDashboard() {
   const tabContent={
     overview:`
       ${goalBanner}
-      <div class="card"><div class="card-title">Views per video</div><div class="bar-chart">${[...videos].sort((a,b)=>new Date(a.snippet.publishedAt)-new Date(b.snippet.publishedAt)).map((v,i,arr)=>{ const views=parseInt(v.statistics?.viewCount||0); const h=Math.max((views/maxViews)*100,2); return`<div class="bar-wrap"><div style="flex:1;display:flex;align-items:flex-end;width:100%"><div class="bar" style="height:${h}%;background:${i===arr.length-1?"#3b82f6":"#bfdbfe"}"></div></div><div class="bar-lbl">${cleanTitle(v.snippet.title).slice(0,10)}</div></div>`; }).join("")}</div></div>
+      <div class="card"><div class="card-title">Views per video</div><div class="bar-chart-wrap"><div class="bar-chart">${[...videos].sort((a,b)=>parseInt(b.statistics?.viewCount||0)-parseInt(a.statistics?.viewCount||0)).map((v,i)=>{ const views=parseInt(v.statistics?.viewCount||0); const h=Math.max((views/maxViews)*100,2); return`<div class="bar-wrap"><div style="flex:1;display:flex;align-items:flex-end;width:100%"><div class="bar" style="height:${h}%;background:${i===0?"#3b82f6":"#bfdbfe"}"></div></div><div class="bar-lbl">${cleanTitle(v.snippet.title).slice(0,8)}</div></div>`; }).join("")}</div></div></div>
       <div class="dark-card"><div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#3b82f6;margin-bottom:10px">📋 ${goals?.goal?"Goal-aligned insights":"What your data is telling you"}</div>
         ${[
           {t:goals?.goal?"Working towards your goal":"Foundation phase",b:goals?.goal?`You're focused on ${goalLabel(goals.goal).toLowerCase()}. ${topVideo?`Your top video "${cleanTitle(topVideo.snippet.title)}" is your strongest signal — analyse what made it work.`:""}`:`${vidCount} videos is the beginning. Every video trains the algorithm.`},

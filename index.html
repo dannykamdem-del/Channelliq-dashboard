@@ -757,10 +757,22 @@ async function init() {
     if (event==="SIGNED_IN" && session) {
       state.user=session.user;
       await loadGoals();
-      // After Google redirect — load channel if handle is saved
       const h=localStorage.getItem("channeliq_handle");
-      if (h) { state.handle=h; await loadChannel(h); }
-      else { state.screen="onboard"; render(); }
+      if (!h) { state.screen="onboard"; render(); return; }
+      state.handle=h;
+      if (state.channel && state.videos.length) {
+        state.screen="dashboard"; state.busy=false; render();
+        scheduleGoalPrompt();
+      } else if (state.backgroundData) {
+        state.channel=state.backgroundData.channel;
+        state.videos=state.backgroundData.videos;
+        state.tier=getTier(parseInt(state.channel.statistics?.subscriberCount||0));
+        state.status=`${state.videos.length} videos loaded ✓`;
+        state.screen="dashboard"; state.busy=false; render();
+        scheduleGoalPrompt();
+      } else {
+        await loadChannel(h);
+      }
     }
     if (event==="SIGNED_OUT") {
       state.user=null; state.channel=null; state.videos=[];
@@ -771,7 +783,6 @@ async function init() {
       render();
     }
   });
-}
 
 async function lookup() {
   const input=document.getElementById("handleInput");
@@ -784,6 +795,7 @@ async function lookup() {
     const d=await r.json();
     if (d.error) { state.error=d.error; state.busy=false; state.screen="onboard"; render(); return; }
     state.channel=d; state.tier=getTier(parseInt(d.statistics?.subscriberCount||0));
+    localStorage.setItem("channeliq_handle", handle);
     state.screen="teaser"; state.busy=false; render(); fetchBackground();
   } catch(e) { state.error="Connection failed. Please try again."; state.busy=false; state.screen="onboard"; render(); }
 }

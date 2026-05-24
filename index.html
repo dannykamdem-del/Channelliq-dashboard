@@ -223,6 +223,10 @@ body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; 
 .goal-next-btn { width: 100%; padding: 14px; background: #3b82f6; color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity 0.2s; }
 .goal-next-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .goal-skip { display: block; text-align: center; font-size: 12px; color: #475569; margin-top: 14px; cursor: pointer; background: none; border: none; font-family: inherit; width: 100%; }
+.goal-response { background: #0f172a; border: 1.5px solid #1e3a5f; border-radius: 14px; padding: 16px; margin-bottom: 20px; display: flex; gap: 12px; align-items: flex-start; animation: fadeSlide 0.3s ease; }
+.goal-response-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+.goal-response-text { font-size: 13px; color: #cbd5e1; line-height: 1.75; }
+@keyframes fadeSlide { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 
 /* Video selector for Q4 */
 .video-select-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; max-height: 340px; overflow-y: auto; }
@@ -286,37 +290,46 @@ let state = {
 };
 
 // ── GOAL FLOW STATE ───────────────────────────────────────────────────────────
-let goalDraft = { step:1, goal:"", contentType:"", targetAudience:"", referenceVideoIds:[], referenceVideoTitles:[] };
+let goalDraft = {
+  step: 1,
+  goals: [],        // multi-select up to 3
+  contentTypes: [], // multi-select up to 3
+  targetAudience: "",
+  referenceVideoIds: [],
+  referenceVideoTitles: [],
+  showResponse: false // whether to show the AI response card on current step
+};
 
 const GOAL_OPTIONS = [
-  { value:"grow_subscribers", icon:"📈", label:"Grow my subscriber count", sub:"Attract new people to my channel consistently" },
-  { value:"increase_views", icon:"👁", label:"Increase my views and reach", sub:"Get more people discovering my content" },
-  { value:"grow_revenue", icon:"💰", label:"Grow my revenue", sub:"Maximise earnings from my content" },
-  { value:"build_community", icon:"💬", label:"Build a stronger community", sub:"Deepen engagement with my existing audience" },
-  { value:"attract_audience", icon:"🎯", label:"Attract a specific audience", sub:"Reach a particular demographic or niche" },
+  { value:"grow_subscribers", icon:"📈", label:"Grow my subscribers", sub:"Attract new people consistently" },
+  { value:"increase_views",   icon:"👁",  label:"Get more views",       sub:"Expand discovery and reach" },
+  { value:"grow_revenue",     icon:"💰", label:"Increase my revenue",   sub:"Maximise earnings from content" },
+  { value:"build_community",  icon:"💬", label:"Build community",       sub:"Deepen engagement and loyalty" },
+  { value:"attract_audience", icon:"🎯", label:"Reach a new audience",  sub:"Target a specific demographic" },
+  { value:"understand_data",  icon:"📊", label:"Understand what works", sub:"Know which content drives results" },
 ];
 
 const CONTENT_TYPES = [
-  { value:"education", icon:"🎓", label:"Education / Tutorials", sub:"How-tos, explainers, courses" },
-  { value:"entertainment", icon:"😂", label:"Entertainment / Comedy", sub:"Sketches, reactions, humour" },
-  { value:"gaming", icon:"🎮", label:"Gaming", sub:"Let's plays, reviews, streams" },
-  { value:"music", icon:"🎵", label:"Music / Performance", sub:"Original music, covers, performances" },
-  { value:"news", icon:"📰", label:"News / Commentary", sub:"Current events, opinions, analysis" },
-  { value:"business", icon:"💼", label:"Business / Finance", sub:"Entrepreneurship, investing, careers" },
-  { value:"health", icon:"🏋️", label:"Health / Fitness", sub:"Workouts, nutrition, wellbeing" },
-  { value:"podcast", icon:"🎙️", label:"Podcast / Long-form", sub:"Interviews, discussions, deep dives" },
-  { value:"lifestyle", icon:"📱", label:"Lifestyle / Vlog", sub:"Day-in-the-life, travel, personal" },
-  { value:"creative", icon:"🎨", label:"Creative / Art", sub:"Art, design, crafts, DIY" },
+  { value:"education",    icon:"🎓", label:"Education / Tutorials" },
+  { value:"entertainment",icon:"😂", label:"Entertainment / Comedy" },
+  { value:"gaming",       icon:"🎮", label:"Gaming" },
+  { value:"music",        icon:"🎵", label:"Music / Performance" },
+  { value:"news",         icon:"📰", label:"News / Commentary" },
+  { value:"business",     icon:"💼", label:"Business / Finance" },
+  { value:"health",       icon:"🏋️", label:"Health / Fitness" },
+  { value:"podcast",      icon:"🎙️", label:"Podcast / Long-form" },
+  { value:"lifestyle",    icon:"📱", label:"Lifestyle / Vlog" },
+  { value:"creative",     icon:"🎨", label:"Creative / Art" },
 ];
 
 const AUDIENCE_OPTIONS = [
-  { value:"current", icon:"❤️", label:"My current audience", sub:"Deepen loyalty with people who already watch" },
-  { value:"new_niche", icon:"🔍", label:"New viewers in my niche", sub:"Reach people who haven't found me yet" },
-  { value:"young", icon:"⚡", label:"Younger demographic (18–24)", sub:"Gen Z and early millennial viewers" },
-  { value:"professional", icon:"💼", label:"Professional demographic (25–40)", sub:"Career-focused, higher-income viewers" },
-  { value:"us", icon:"🇺🇸", label:"US-based audience", sub:"Higher CPM, stronger monetisation potential" },
-  { value:"uk", icon:"🇬🇧", label:"UK / European audience", sub:"English-speaking, culturally aligned" },
-  { value:"global", icon:"🌍", label:"Global audience", sub:"Maximise total reach across all markets" },
+  { value:"current",      icon:"❤️",  label:"My current audience",       sub:"Deepen loyalty with existing viewers" },
+  { value:"new_niche",    icon:"🔍", label:"New viewers in my niche",    sub:"People who haven't found me yet" },
+  { value:"young",        icon:"⚡", label:"Younger viewers (18–24)",   sub:"Gen Z and early millennial audience" },
+  { value:"professional", icon:"💼", label:"Professionals (25–40)",      sub:"Career-focused, higher-income viewers" },
+  { value:"us",           icon:"🇺🇸", label:"US-based audience",          sub:"Higher CPM, stronger revenue potential" },
+  { value:"uk",           icon:"🇬🇧", label:"UK / European audience",     sub:"English-speaking, culturally aligned" },
+  { value:"global",       icon:"🌍", label:"Global audience",            sub:"Maximum reach across all markets" },
 ];
 
 const fmt = n=>n>=1e6?(n/1e6).toFixed(1)+"M":n>=1000?(n/1000).toFixed(1)+"K":String(n||0);
@@ -327,9 +340,76 @@ const getTierLabel = t=>t==="gold"?"🥇 Gold":t==="silver"?"🥈 Silver":"🥉 
 const getTierBadgeClass = t=>`tier-badge tier-badge-${t}`;
 const isLocked = required=>{ const o=["bronze","silver","gold"]; return o.indexOf(state.tier)<o.indexOf(required); };
 const cleanTitle = t=>t.replace(/#\S+/g,"").replace(/\s+/g," ").trim();
-const goalLabel = v=>GOAL_OPTIONS.find(o=>o.value===v)?.label||v;
-const contentLabel = v=>CONTENT_TYPES.find(o=>o.value===v)?.label||v;
+const goalsLabel = arr=>(arr||[]).map(v=>GOAL_OPTIONS.find(o=>o.value===v)?.label||v).join(", ");
+const contentLabel = arr=>(arr||[]).map(v=>CONTENT_TYPES.find(o=>o.value===v)?.label||v).join(", ");
 const audienceLabel = v=>AUDIENCE_OPTIONS.find(o=>o.value===v)?.label||v;
+
+// ── CONTEXTUAL RESPONSES ──────────────────────────────────────────────────────
+function goalResponse(goals, channel) {
+  const name = channel?.snippet?.title||"your channel";
+  const subs = parseInt(channel?.statistics?.subscriberCount||0);
+  const videos = state.videos||[];
+  const topVideo = [...videos].sort((a,b)=>parseInt(b.statistics?.viewCount||0)-parseInt(a.statistics?.viewCount||0))[0];
+  const topTitle = topVideo ? `"${cleanTitle(topVideo.snippet.title)}"` : "your best video";
+  const hasRevenue = goals.includes("grow_revenue");
+  const hasSubs = goals.includes("grow_subscribers");
+  const hasViews = goals.includes("increase_views");
+  const hasCommunity = goals.includes("build_community");
+
+  if (hasRevenue && hasSubs) return `Smart pairing. Growing subscribers and revenue together is absolutely achievable — but they often need different tactics. Subscribers love consistency and personality; revenue loves watch time and audience quality. Looking at ${name}'s ${videos.length} videos, we'll identify which ones drive both, and help you make more of them.`;
+  if (hasRevenue) return `Revenue growth on YouTube comes down to three things: watch time, audience geography, and content CPM. ${name} has ${fmt(subs)} subscribers — the foundation is there. We'll analyse which of your videos hold attention longest and attract higher-value audiences, then help you double down on those formats.`;
+  if (hasSubs && hasViews) return `Views get you found. Subscribers mean people came back. ${name} is currently converting at a rate we can measure — we'll find which videos are your best subscriber magnets and what they have in common, so you can replicate that formula intentionally.`;
+  if (hasSubs) return `Subscriber growth is the compounding metric — every new subscriber makes the next one easier. For ${name}, we'll look at which of your ${videos.length} videos drove the most subscriptions relative to their view count. That ratio tells us exactly what content makes people say "I want more of this."`;
+  if (hasCommunity) return `Community is your moat. A channel with 5,000 engaged viewers is more valuable — and more resilient — than one with 50,000 passive ones. We'll analyse your comment sentiment and engagement patterns to understand what makes your audience feel connected, and how to amplify that.`;
+  if (hasViews) return `Views start with discoverability. For ${name}, that means understanding which topics, titles, and thumbnails are already working — then making more of them. ${topVideo?`${topTitle} is your current benchmark. Let's understand why it outperformed and build from there.`:"We'll build your benchmark from the data you already have."}`;
+  return `Understanding what works is the foundation of everything else. We'll use your ${videos.length} videos as a dataset — looking at which formats, topics, and styles consistently outperform, and turning that into a clear picture of your channel's strengths.`;
+}
+
+function contentResponse(contentTypes, goals, channel) {
+  const name = channel?.snippet?.title||"your channel";
+  const videos = state.videos||[];
+  const topVideo = [...videos].sort((a,b)=>parseInt(b.statistics?.viewCount||0)-parseInt(a.statistics?.viewCount||0))[0];
+  const topTitle = topVideo ? `"${cleanTitle(topVideo.snippet.title)}"` : "your top video";
+  const hasEdu = contentTypes.includes("education");
+  const hasEnt = contentTypes.includes("entertainment");
+  const hasPod = contentTypes.includes("podcast");
+  const hasBiz = contentTypes.includes("business");
+  const hasLife = contentTypes.includes("lifestyle");
+  const goalStr = (goals||[]).map(v=>GOAL_OPTIONS.find(o=>o.value===v)?.label||v).join(" and ").toLowerCase();
+
+  if (hasEdu && hasBiz) return `Education and business content is one of the highest-CPM combinations on YouTube. Audiences are professional, intentional, and willing to act on recommendations. To ${goalStr||"grow"}, we'll look at which of ${name}'s videos blend practical value with personality — that's the sweet spot for this niche.`;
+  if (hasEdu) return `Educational content builds trust faster than almost any other format. Viewers who learn something from you become loyal subscribers. For ${name}, we'll analyse which tutorials or explainers generated the most engagement — comments asking follow-up questions are a goldmine signal that people genuinely want more.`;
+  if (hasEnt) return `Entertainment content lives and dies by watch time and shareability. The algorithm rewards videos people finish and send to friends. We'll look at ${name}'s retention patterns across formats to find what keeps people watching — and what's losing them in the first 30 seconds.`;
+  if (hasPod) return `Long-form podcast content attracts highly loyal audiences who invest real time in your channel. That loyalty shows up in comments and repeat views. For ${name}, we'll analyse comment sentiment by video to find which conversations resonated most — those are the topics to go deeper on.`;
+  if (hasBiz) return `Business and finance content performs exceptionally well with high-intent audiences — people watching to make decisions. ${topTitle} on ${name} is already pulling this audience. We'll use that as a benchmark to understand what makes your business content land, and replicate it.`;
+  if (hasLife) return `Lifestyle content succeeds when the audience connects with you as a person, not just the content. Your comment sentiment data will reveal how people feel about you — whether they're watching for the information or because they genuinely like you. That's a crucial distinction for growth strategy.`;
+  return `With ${contentTypes.map(v=>CONTENT_TYPES.find(o=>o.value===v)?.label||v).join(" and ")} content, you have a versatile mix. We'll segment your videos by type and show you which format is driving the most growth for ${name} right now — so you can invest your time where it has the highest return.`;
+}
+
+function audienceResponse(audience, contentTypes, goals, channel) {
+  const name = channel?.snippet?.title||"your channel";
+  const videos = state.videos||[];
+  const avgViews = videos.length ? Math.round(videos.reduce((s,v)=>s+parseInt(v.statistics?.viewCount||0),0)/videos.length) : 0;
+
+  if (audience==="us") return `US audiences are the highest-CPM market on YouTube — often 3–5x the revenue per view compared to other regions. For ${name}, we'll identify your current US viewer percentage and show you exactly which posting times and content styles attract US traffic. Small shifts here can meaningfully move your revenue.`;
+  if (audience==="young") return `18–24 audiences discover content differently — they come via Shorts, community posts, and peer sharing rather than search. For ${name}, we'll look at which of your videos performed best with younger demographics and what they had in common. Pacing, format length, and thumbnail style all matter here.`;
+  if (audience==="professional") return `Professional audiences (25–40) are search-driven and value-hungry. They'll watch longer videos if the content delivers genuine insight. ${name} is currently averaging ${fmt(avgViews)} views per video — with the right targeting, that audience will also have the highest subscription and purchase intent.`;
+  if (audience==="current") return `Deepening loyalty with your existing audience is often more valuable than chasing new viewers. For ${name}, we'll focus on comment sentiment and engagement patterns — understanding what makes your current viewers feel seen and valued, so they become advocates who bring new people in organically.`;
+  if (audience==="new_niche") return `Reaching new viewers in your niche means winning on search and suggested. For ${name}, we'll analyse which of your videos already pull in new viewers versus rewarding returning ones — that tells us which content format is your best discovery engine, and how to make more like it.`;
+  if (audience==="uk") return `UK and European audiences are highly engaged and convert well for community-building goals. For ${name}, we'll look at your optimal posting windows for European time zones and which content formats resonate with this audience based on your existing data.`;
+  return `A global audience strategy means making content that travels well — clear language, universal topics, and visuals that communicate across cultures. We'll look at ${name}'s current geography mix and show you which videos are already pulling international audiences.`;
+}
+
+function referenceVideoResponse(refTitles, goals, contentTypes, channel) {
+  const name = channel?.snippet?.title||"your channel";
+  const goalStr = (goals||[]).map(v=>GOAL_OPTIONS.find(o=>o.value===v)?.label||v).join(" and ").toLowerCase();
+  const contentStr = (contentTypes||[]).map(v=>CONTENT_TYPES.find(o=>o.value===v)?.label||v).join(", ");
+
+  if (!refTitles?.length) return `No reference videos selected — we'll use your full catalogue as the baseline. You can always come back and add reference videos to make your insights sharper.`;
+
+  const titles = refTitles.slice(0,3).map(t=>`"${t}"`).join(", ");
+  return `Perfect. We'll use ${titles} as your reference set. Every insight from now on will be measured against what makes these videos work — their titles, posting patterns, engagement rates, and sentiment themes. This is how we'll help you ${goalStr||"grow"} intentionally rather than by guessing. Your personalised growth plan is ready.`;
+}
 
 // ── GOAL PROMPT ───────────────────────────────────────────────────────────────
 function scheduleGoalPrompt() {
@@ -351,8 +431,18 @@ function dismissGoalPrompt() {
 // ── GOAL FLOW ─────────────────────────────────────────────────────────────────
 function openGoalFlow() {
   dismissGoalPrompt();
-  goalDraft = { step:1, goal:state.goals?.goal||"", contentType:state.goals?.content_type||"", targetAudience:state.goals?.target_audience||"", referenceVideoIds:state.goals?.reference_video_ids||[], referenceVideoTitles:state.goals?.reference_video_titles||[] };
+  const existing = state.goals;
+  goalDraft = {
+    step: 1,
+    goals: existing?.goal ? (Array.isArray(existing.goal) ? existing.goal : [existing.goal]) : [],
+    contentTypes: existing?.content_type ? (Array.isArray(existing.content_type) ? existing.content_type : [existing.content_type]) : [],
+    targetAudience: existing?.target_audience||"",
+    referenceVideoIds: existing?.reference_video_ids||[],
+    referenceVideoTitles: existing?.reference_video_titles||[],
+    showResponse: false
+  };
   document.getElementById("goalOverlay").style.display="flex";
+  document.getElementById("goalFlow").scrollTop=0;
   renderGoalStep();
 }
 
@@ -360,88 +450,133 @@ function closeGoalFlow() {
   document.getElementById("goalOverlay").style.display="none";
 }
 
+function checkmark() { return `<svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>`; }
+
 function renderGoalStep() {
   const flow = document.getElementById("goalFlow");
   const step = goalDraft.step;
-  const progressHTML = `<div class="goal-progress">${[1,2,3,4].map(i=>`<div class="goal-progress-step ${i<step?"done":i===step?"active":""}"></div>`).join("")}</div>`;
-  const headerHTML = `<div class="goal-header"><div class="goal-header-left"><div class="goal-logo-box">YT</div><span class="goal-logo-text">ChannelIQ</span></div><button class="goal-close" onclick="closeGoalFlow()">Skip for now</button></div>`;
+  const progress = `<div class="goal-progress">${[1,2,3,4].map(i=>`<div class="goal-progress-step ${i<step?"done":i===step?"active":""}"></div>`).join("")}</div>`;
+  const header = `<div class="goal-header"><div class="goal-header-left"><div class="goal-logo-box">YT</div><span class="goal-logo-text">ChannelIQ</span></div><button class="goal-close" onclick="closeGoalFlow()">Skip for now</button></div>`;
+  const ch = state.channel;
 
+  // ── STEP 1: Goals (multi-select)
   if (step===1) {
-    flow.innerHTML=`${headerHTML}${progressHTML}
+    const hasSelection = goalDraft.goals.length > 0;
+    const response = hasSelection ? goalResponse(goalDraft.goals, ch) : "";
+    flow.innerHTML=`${header}${progress}
       <div class="goal-step-label">Step 1 of 4</div>
-      <div class="goal-step-title">What's your primary goal right now?</div>
-      <div class="goal-step-sub">We'll use this to prioritise the metrics and insights that matter most for where you want to go.</div>
+      <div class="goal-step-title">What would you like me to help you with?</div>
+      <div class="goal-step-sub">Choose up to 3 — we'll tailor everything to what matters most to you.</div>
       <div class="goal-options">
-        ${GOAL_OPTIONS.map(o=>`
-          <div class="goal-option ${goalDraft.goal===o.value?"selected":""}" onclick="selectGoal('${o.value}')">
+        ${GOAL_OPTIONS.map(o=>{
+          const sel = goalDraft.goals.includes(o.value);
+          return`<div class="goal-option ${sel?"selected":""}" onclick="toggleGoal('${o.value}')">
             <div class="goal-option-icon">${o.icon}</div>
             <div style="flex:1"><div class="goal-option-label">${o.label}</div><div class="goal-option-sub">${o.sub}</div></div>
-            <div class="goal-option-check">${goalDraft.goal===o.value?`<svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>`:""}
-            </div>
-          </div>`).join("")}
+            <div class="goal-option-check">${sel?checkmark():""}</div>
+          </div>`;
+        }).join("")}
       </div>
-      <button class="goal-next-btn" onclick="nextGoalStep()" ${goalDraft.goal?"":"disabled"}>Continue →</button>`;
+      ${response?`<div class="goal-response"><div class="goal-response-icon">💡</div><div class="goal-response-text">${response}</div></div>`:""}
+      <button class="goal-next-btn" onclick="goalDraft.step=2;renderGoalStep()" ${hasSelection?"":"disabled"}>Got it — what do you make? →</button>`;
   }
 
+  // ── STEP 2: Content type (multi-select)
   else if (step===2) {
-    flow.innerHTML=`${headerHTML}${progressHTML}
+    const hasSelection = goalDraft.contentTypes.length > 0;
+    const response = hasSelection ? contentResponse(goalDraft.contentTypes, goalDraft.goals, ch) : "";
+    flow.innerHTML=`${header}${progress}
       <div class="goal-step-label">Step 2 of 4</div>
       <div class="goal-step-title">What type of content do you make?</div>
-      <div class="goal-step-sub">This helps us benchmark your performance against the right creators and tailor recommendations to your format.</div>
-      <div class="goal-options">
-        ${CONTENT_TYPES.map(o=>`
-          <div class="goal-option ${goalDraft.contentType===o.value?"selected":""}" onclick="selectContentType('${o.value}')">
-            <div class="goal-option-icon">${o.icon}</div>
-            <div style="flex:1"><div class="goal-option-label">${o.label}</div><div class="goal-option-sub">${o.sub}</div></div>
-            <div class="goal-option-check">${goalDraft.contentType===o.value?`<svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>`:""}</div>
-          </div>`).join("")}
+      <div class="goal-step-sub">Choose up to 3 that best describe your channel.</div>
+      <div class="goal-options" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        ${CONTENT_TYPES.map(o=>{
+          const sel = goalDraft.contentTypes.includes(o.value);
+          return`<div class="goal-option ${sel?"selected":""}" style="padding:12px" onclick="toggleContentType('${o.value}')">
+            <div class="goal-option-icon" style="font-size:18px">${o.icon}</div>
+            <div style="flex:1;min-width:0"><div class="goal-option-label" style="font-size:12px">${o.label}</div></div>
+            <div class="goal-option-check" style="width:16px;height:16px">${sel?checkmark():""}</div>
+          </div>`;
+        }).join("")}
       </div>
-      <button class="goal-next-btn" onclick="nextGoalStep()" ${goalDraft.contentType?"":"disabled"}>Continue →</button>
+      ${response?`<div class="goal-response"><div class="goal-response-icon">💡</div><div class="goal-response-text">${response}</div></div>`:""}
+      <button class="goal-next-btn" onclick="goalDraft.step=3;renderGoalStep()" ${hasSelection?"":"disabled"}>Who do you want to reach? →</button>
       <button class="goal-skip" onclick="goalDraft.step=3;renderGoalStep()">Skip this step</button>`;
   }
 
+  // ── STEP 3: Target audience (single)
   else if (step===3) {
-    flow.innerHTML=`${headerHTML}${progressHTML}
+    const hasSelection = !!goalDraft.targetAudience;
+    const response = hasSelection ? audienceResponse(goalDraft.targetAudience, goalDraft.contentTypes, goalDraft.goals, ch) : "";
+    flow.innerHTML=`${header}${progress}
       <div class="goal-step-label">Step 3 of 4</div>
       <div class="goal-step-title">Who do you most want to reach?</div>
-      <div class="goal-step-sub">Understanding your target audience lets us give you smarter posting time recommendations and geography-specific growth insights.</div>
+      <div class="goal-step-sub">Pick the audience that matters most right now.</div>
       <div class="goal-options">
-        ${AUDIENCE_OPTIONS.map(o=>`
-          <div class="goal-option ${goalDraft.targetAudience===o.value?"selected":""}" onclick="selectAudience('${o.value}')">
+        ${AUDIENCE_OPTIONS.map(o=>{
+          const sel = goalDraft.targetAudience===o.value;
+          return`<div class="goal-option ${sel?"selected":""}" onclick="selectAudience('${o.value}')">
             <div class="goal-option-icon">${o.icon}</div>
             <div style="flex:1"><div class="goal-option-label">${o.label}</div><div class="goal-option-sub">${o.sub}</div></div>
-            <div class="goal-option-check">${goalDraft.targetAudience===o.value?`<svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>`:""}</div>
-          </div>`).join("")}
+            <div class="goal-option-check">${sel?checkmark():""}</div>
+          </div>`;
+        }).join("")}
       </div>
-      <button class="goal-next-btn" onclick="nextGoalStep()" ${goalDraft.targetAudience?"":"disabled"}>Continue →</button>
+      ${response?`<div class="goal-response"><div class="goal-response-icon">💡</div><div class="goal-response-text">${response}</div></div>`:""}
+      <button class="goal-next-btn" onclick="goalDraft.step=4;renderGoalStep()" ${hasSelection?"":"disabled"}>Now pick your reference videos →</button>
       <button class="goal-skip" onclick="goalDraft.step=4;renderGoalStep()">Skip this step</button>`;
   }
 
+  // ── STEP 4: Reference videos
   else if (step===4) {
     const videos = state.videos||[];
-    flow.innerHTML=`${headerHTML}${progressHTML}
-      <div class="goal-step-label">Step 4 of 4</div>
-      <div class="goal-step-title">Which videos best represent your direction?</div>
-      <div class="goal-step-sub">Select 1–3 videos that feel most "on brand" for where you want to go. We'll use these as your reference set — every insight will be benchmarked against what makes these videos work.</div>
+    const sorted = [...videos].sort((a,b)=>parseInt(b.statistics?.viewCount||0)-parseInt(a.statistics?.viewCount||0));
+    const response = goalDraft.referenceVideoIds.length>0 ? referenceVideoResponse(goalDraft.referenceVideoTitles, goalDraft.goals, goalDraft.contentTypes, ch) : "";
+    flow.innerHTML=`${header}${progress}
+      <div class="goal-step-label">Step 4 of 4 — Final step</div>
+      <div class="goal-step-title">Which videos feel most like your future direction?</div>
+      <div class="goal-step-sub">Select up to 3. These become your reference set — every insight will be benchmarked against what makes these videos work.</div>
       <div class="video-select-list">
-        ${videos.length?videos.map(v=>{
+        ${sorted.length?sorted.map(v=>{
           const isSelected = goalDraft.referenceVideoIds.includes(v.id);
           const thumb = v.snippet.thumbnails?.medium?.url||v.snippet.thumbnails?.default?.url||"";
-          return`<div class="video-select-item ${isSelected?"selected":""}" onclick="toggleRefVideo('${v.id}','${cleanTitle(v.snippet.title).replace(/'/g,"\\'")}')">
+          const views = parseInt(v.statistics?.viewCount||0);
+          const safeTitle = cleanTitle(v.snippet.title).replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/"/g,'\\"');
+          return`<div class="video-select-item ${isSelected?"selected":""}" onclick="toggleRefVideo('${v.id}','${safeTitle}')">
             ${thumb?`<img class="video-select-thumb" src="${thumb}" onerror="this.style.display='none'"/>`:`<div class="video-select-thumb"></div>`}
-            <div class="video-select-title">${cleanTitle(v.snippet.title)}</div>
-            <div class="video-select-check">${isSelected?`<svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>`:""}</div>
+            <div style="flex:1;min-width:0">
+              <div class="video-select-title">${cleanTitle(v.snippet.title)}</div>
+              <div style="font-size:10px;color:#64748b;margin-top:2px">${fmt(views)} views</div>
+            </div>
+            <div class="video-select-check">${isSelected?checkmark():""}</div>
           </div>`;
         }).join(""):`<div style="text-align:center;padding:24px;color:#64748b;font-size:13px">No videos loaded yet</div>`}
       </div>
-      <button class="goal-next-btn" onclick="saveGoals()">Save my goals ✓</button>
-      <button class="goal-skip" onclick="saveGoals()">Skip — save without reference videos</button>`;
+      ${response?`<div class="goal-response" style="border-color:#10b981"><div class="goal-response-icon">🎯</div><div class="goal-response-text">${response}</div></div>`:""}
+      <button class="goal-next-btn" onclick="saveGoals()">Save my goals and personalise my dashboard ✓</button>
+      <button class="goal-skip" onclick="saveGoals()">Save without reference videos</button>`;
   }
+
+  // Scroll to top of flow on step change
+  flow.scrollTop = 0;
 }
 
-function selectGoal(v) { goalDraft.goal=v; renderGoalStep(); }
-function selectContentType(v) { goalDraft.contentType=v; renderGoalStep(); }
+function toggleGoal(v) {
+  const idx = goalDraft.goals.indexOf(v);
+  if (idx>-1) goalDraft.goals.splice(idx,1);
+  else if (goalDraft.goals.length<3) goalDraft.goals.push(v);
+  renderGoalStep();
+}
+
+function toggleContentType(v) {
+  const idx = goalDraft.contentTypes.indexOf(v);
+  if (idx>-1) goalDraft.contentTypes.splice(idx,1);
+  else if (goalDraft.contentTypes.length<3) goalDraft.contentTypes.push(v);
+  renderGoalStep();
+}
+
 function selectAudience(v) { goalDraft.targetAudience=v; renderGoalStep(); }
+
 function toggleRefVideo(id, title) {
   const idx = goalDraft.referenceVideoIds.indexOf(id);
   if (idx>-1) {
@@ -453,33 +588,32 @@ function toggleRefVideo(id, title) {
   }
   renderGoalStep();
 }
-function nextGoalStep() { goalDraft.step++; renderGoalStep(); }
 
 async function saveGoals() {
-  if (!state.user) { closeGoalFlow(); return; }
-  try {
-    const payload = {
-      user_id: state.user.id,
-      goal: goalDraft.goal,
-      content_type: goalDraft.contentType,
-      target_audience: goalDraft.targetAudience,
-      reference_video_ids: goalDraft.referenceVideoIds,
-      reference_video_titles: goalDraft.referenceVideoTitles,
-      updated_at: new Date().toISOString()
-    };
-    const { error } = await sb.from("user_goals").upsert(payload, { onConflict:"user_id" });
-    if (!error) {
-      state.goals = payload;
-      closeGoalFlow();
-      render();
-      // Show confirmation
-      const toast = document.createElement("div");
-      toast.style.cssText="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#10b981;color:white;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:700;z-index:300;";
-      toast.textContent="✓ Goals saved — your insights are now personalised";
-      document.body.appendChild(toast);
-      setTimeout(()=>toast.remove(),3000);
-    }
-  } catch(e) { console.error(e); closeGoalFlow(); }
+  closeGoalFlow();
+  const payload = {
+    user_id: state.user?.id,
+    goal: goalDraft.goals,
+    content_type: goalDraft.contentTypes,
+    target_audience: goalDraft.targetAudience,
+    reference_video_ids: goalDraft.referenceVideoIds,
+    reference_video_titles: goalDraft.referenceVideoTitles,
+    updated_at: new Date().toISOString()
+  };
+  state.goals = payload;
+  render();
+  // Save to Supabase in background
+  if (state.user) {
+    try {
+      await sb.from("user_goals").upsert({ ...payload }, { onConflict:"user_id" });
+    } catch(e) { console.error("Goals save error:", e); }
+  }
+  // Toast
+  const toast = document.createElement("div");
+  toast.style.cssText="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#10b981;color:white;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:700;z-index:300;white-space:nowrap;";
+  toast.textContent="✓ Goals saved — insights are now personalised";
+  document.body.appendChild(toast);
+  setTimeout(()=>toast.remove(),3000);
 }
 
 async function loadGoals() {

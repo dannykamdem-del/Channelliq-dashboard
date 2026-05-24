@@ -88,13 +88,17 @@ body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; 
 .tabs { display: flex; gap: 3px; background: #e2e8f0; padding: 3px; border-radius: 10px; margin-bottom: 16px; }
 .tab { flex: 1; padding: 7px 2px; border-radius: 8px; border: none; cursor: pointer; font-family: inherit; font-size: 11px; font-weight: 600; background: transparent; color: #64748b; text-transform: capitalize; white-space: nowrap; }
 .tab.active { background: white; color: #0f172a; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-.video-card { background: white; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 14px; margin-bottom: 10px; }
+.video-card { background: white; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 14px; margin-bottom: 10px; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
+.video-card:hover { border-color: #3b82f6; box-shadow: 0 2px 8px rgba(59,130,246,0.15); }
+.video-card.selected { border-color: #3b82f6; background: #eff6ff; }
 .video-thumb { width: 88px; height: 50px; object-fit: cover; border-radius: 6px; flex-shrink: 0; }
 .stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; margin-top: 10px; }
 .stat-box { background: #f8fafc; border-radius: 8px; padding: 7px 4px; text-align: center; }
 .stat-val { font-size: 13px; font-weight: 800; font-family: monospace; }
 .stat-lbl { font-size: 9px; color: #94a3b8; margin-top: 2px; }
 .comment-card { background: white; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 8px; }
+.spam-card { background: #fff7ed; border: 1.5px solid #fed7aa; border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; }
+.spam-reason { display: inline-block; background: #ef444422; color: #ef4444; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; margin-bottom: 6px; }
 .sentiment-bars { display: flex; gap: 8px; margin-bottom: 14px; }
 .sentiment-bar { flex: 1; background: #f8fafc; border-radius: 12px; padding: 12px 8px; text-align: center; }
 .sentiment-pct { font-size: 28px; font-weight: 800; font-family: monospace; line-height: 1; }
@@ -111,6 +115,8 @@ body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; 
 .insight-body { font-size: 11px; color: #94a3b8; line-height: 1.6; }
 .btn { padding: 11px 22px; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; color: white; background: #3b82f6; }
 .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-sm { padding: 7px 14px; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; color: white; background: #3b82f6; }
+.btn-ghost { padding: 7px 14px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; color: #64748b; background: white; }
 .empty { text-align: center; padding: 36px 20px; }
 .empty-icon { font-size: 32px; margin-bottom: 10px; }
 .empty-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
@@ -121,7 +127,7 @@ body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; 
 .bar { width: 100%; border-radius: 4px 4px 0 0; min-height: 2px; }
 .bar-lbl { font-size: 8px; color: #94a3b8; text-align: center; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .signout-btn { background: #1e293b; color: #64748b; border: none; border-radius: 8px; padding: 4px 10px; font-size: 11px; cursor: pointer; font-family: inherit; }
-.pipeline-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; margin-bottom: 0; }
+.pipeline-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
 .pipeline-stat { background: #1e293b; border-radius: 10px; padding: 10px 12px; }
 .pipeline-val { font-size: 20px; font-weight: 800; font-family: monospace; }
 .pipeline-lbl { font-size: 10px; color: #64748b; margin-top: 2px; }
@@ -129,6 +135,11 @@ body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; 
 .sw-card { background: white; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 14px; }
 .sw-title { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
 .sw-item { font-size: 12px; color: #475569; padding: 5px 0; border-bottom: 1px solid #f1f5f9; line-height: 1.5; }
+.video-detail-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.back-btn { background: #1e293b; color: #94a3b8; border: none; border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; flex-shrink: 0; }
+.collapsible-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 4px 0; }
+.collapsible-content { display: none; margin-top: 12px; }
+.collapsible-content.open { display: block; }
 </style>
 </head>
 <body>
@@ -149,7 +160,9 @@ let state = {
   screen:"loading", user:null, channel:null, handle:"",
   videos:[], comments:[], sentiment:null, tab:"overview",
   status:"", busy:false, tier:"bronze", error:"", backgroundData:null,
-  goal:"", creatorType:""
+  goal:"", creatorType:"",
+  selectedVideo:null, videoSentiment:null, videoComments:[],
+  spamVisible:false
 };
 
 const fmt = n=>n>=1e6?(n/1e6).toFixed(1)+"M":n>=1000?(n/1000).toFixed(1)+"K":String(n||0);
@@ -173,113 +186,76 @@ async function init() {
   const saved = localStorage.getItem("channeliq_handle");
   if (session) {
     state.user = session.user;
-    if (saved) {
-      state.handle = saved;
-      state.screen = "loading";
-      render();
-      await loadChannel(saved);
-    } else {
-      state.screen = "onboard";
-      render();
-    }
+    if (saved) { state.handle=saved; state.screen="loading"; render(); await loadChannel(saved); }
+    else { state.screen="onboard"; render(); }
   } else {
-    if (saved) state.handle = saved;
-    state.screen = "onboard";
-    render();
+    if (saved) state.handle=saved;
+    state.screen="onboard"; render();
   }
   sb.auth.onAuthStateChange(async (event, session) => {
-    if (event === "SIGNED_IN" && session) {
-      state.user = session.user;
-      const h = localStorage.getItem("channeliq_handle");
+    if (event==="SIGNED_IN" && session) {
+      state.user=session.user;
+      const h=localStorage.getItem("channeliq_handle");
       if (state.backgroundData && h) {
-        state.channel = state.backgroundData.channel;
-        state.videos = state.backgroundData.videos;
-        state.tier = getTier(parseInt(state.channel.statistics?.subscriberCount||0));
-        state.status = `${state.videos.length} videos loaded ✓`;
-        state.screen = "dashboard";
-        state.busy = false;
-        render();
-      } else if (h) {
-        state.handle = h;
-        await loadChannel(h);
-      } else {
-        state.screen = "onboard";
-        render();
-      }
+        state.channel=state.backgroundData.channel;
+        state.videos=state.backgroundData.videos;
+        state.tier=getTier(parseInt(state.channel.statistics?.subscriberCount||0));
+        state.status=`${state.videos.length} videos loaded ✓`;
+        state.screen="dashboard"; state.busy=false; render();
+      } else if (h) { state.handle=h; await loadChannel(h); }
+      else { state.screen="onboard"; render(); }
     }
-    if (event === "SIGNED_OUT") {
+    if (event==="SIGNED_OUT") {
       state.user=null; state.channel=null; state.videos=[];
       state.comments=[]; state.sentiment=null; state.screen="onboard";
-      localStorage.removeItem("channeliq_handle");
-      render();
+      localStorage.removeItem("channeliq_handle"); render();
     }
   });
 }
 
 async function lookup() {
-  const input = document.getElementById("handleInput");
+  const input=document.getElementById("handleInput");
   if (!input) return;
-  const handle = input.value.trim();
+  const handle=input.value.trim();
   if (!handle) return;
-  state.handle = handle;
-  state.error = "";
-  state.busy = true;
-  state.screen = "loading";
-  render();
+  state.handle=handle; state.error=""; state.busy=true; state.screen="loading"; render();
   try {
-    const r = await fetch(`${SERVER}/lookup?handle=${encodeURIComponent(handle)}`);
-    const d = await r.json();
+    const r=await fetch(`${SERVER}/lookup?handle=${encodeURIComponent(handle)}`);
+    const d=await r.json();
     if (d.error) { state.error=d.error; state.busy=false; state.screen="onboard"; render(); return; }
-    state.channel = d;
-    state.tier = getTier(parseInt(d.statistics?.subscriberCount||0));
-    state.screen = "teaser";
-    state.busy = false;
-    render();
-    fetchBackground();
-  } catch(e) {
-    state.error="Connection failed. Please try again.";
-    state.busy=false; state.screen="onboard"; render();
-  }
+    state.channel=d; state.tier=getTier(parseInt(d.statistics?.subscriberCount||0));
+    state.screen="teaser"; state.busy=false; render(); fetchBackground();
+  } catch(e) { state.error="Connection failed. Please try again."; state.busy=false; state.screen="onboard"; render(); }
 }
 
 async function fetchBackground() {
   try {
-    const r = await fetch(`${SERVER}/videos?channelId=${state.channel.id}`);
-    const d = await r.json();
-    state.backgroundData = { channel:state.channel, videos:d.items||[] };
+    const r=await fetch(`${SERVER}/videos?channelId=${state.channel.id}`);
+    const d=await r.json();
+    state.backgroundData={ channel:state.channel, videos:d.items||[] };
   } catch(_) {}
 }
 
 async function signInWithGoogle() {
   if (state.handle) localStorage.setItem("channeliq_handle", state.handle);
-  await sb.auth.signInWithOAuth({
-    provider:"google",
-    options:{ redirectTo:"https://ytanalyst.netlify.app" }
-  });
+  await sb.auth.signInWithOAuth({ provider:"google", options:{ redirectTo:"https://ytanalyst.netlify.app" } });
 }
 
 async function signOut() { await sb.auth.signOut(); }
 
 async function loadChannel(handle) {
-  state.status="Loading your channel...";
-  state.screen="loading";
-  render();
+  state.status="Loading your channel..."; state.screen="loading"; render();
   try {
-    const r = await fetch(`${SERVER}/lookup?handle=${encodeURIComponent(handle)}`);
-    const d = await r.json();
+    const r=await fetch(`${SERVER}/lookup?handle=${encodeURIComponent(handle)}`);
+    const d=await r.json();
     if (d.error) throw new Error(d.error);
-    state.channel = d;
-    state.tier = getTier(parseInt(d.statistics?.subscriberCount||0));
-    const vr = await fetch(`${SERVER}/videos?channelId=${d.id}`);
-    const vd = await vr.json();
-    state.videos = vd.items||[];
-    state.status = `${state.videos.length} videos loaded ✓`;
-    state.screen = "dashboard";
-    state.busy = false;
-    render();
-  } catch(e) {
-    state.error=e.message; state.screen="onboard"; render();
-  }
+    state.channel=d; state.tier=getTier(parseInt(d.statistics?.subscriberCount||0));
+    const vr=await fetch(`${SERVER}/videos?channelId=${d.id}`);
+    const vd=await vr.json();
+    state.videos=vd.items||[];
+    state.status=`${state.videos.length} videos loaded ✓`;
+    state.screen="dashboard"; state.busy=false; render();
+  } catch(e) { state.error=e.message; state.screen="onboard"; render(); }
 }
 
 async function fetchComments() {
@@ -287,8 +263,7 @@ async function fetchComments() {
   state.busy=true;
   const all=[];
   for (const v of state.videos) {
-    state.status=`Fetching: ${v.snippet.title.slice(0,25)}...`;
-    render();
+    state.status=`Fetching: ${v.snippet.title.slice(0,25)}...`; render();
     try {
       const r=await fetch(`${SERVER}/comments?videoId=${v.id}`);
       const d=await r.json();
@@ -298,10 +273,7 @@ async function fetchComments() {
       });
     } catch(_) {}
   }
-  state.comments=all;
-  state.status=`${all.length} comments loaded ✓`;
-  state.busy=false;
-  render();
+  state.comments=all; state.status=`${all.length} comments loaded ✓`; state.busy=false; render();
   if (all.length) runSentiment(all);
 }
 
@@ -311,31 +283,138 @@ async function runSentiment(data) {
   state.busy=true; state.status="Running AI analysis..."; render();
   try {
     const r=await fetch(`${SERVER}/sentiment`,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        comments:src,
-        goal: state.goal||"",
-        creatorType: state.creatorType||""
-      })
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({ comments:src, goal:state.goal||"", creatorType:state.creatorType||"" })
     });
     if (!r.ok) throw new Error(`Error ${r.status}`);
     state.sentiment=await r.json();
-    state.status="Analysis complete ✓";
-    state.tab="sentiment";
+    state.status="Analysis complete ✓"; state.tab="sentiment";
   } catch(e) { state.status="AI error: "+e.message; }
   state.busy=false; render();
 }
 
+async function openVideo(video) {
+  state.selectedVideo=video; state.videoSentiment=null; state.videoComments=[];
+  state.screen="videodetail"; render();
+  state.busy=true; state.status=`Loading comments for "${video.snippet.title.slice(0,30)}..."`; render();
+  try {
+    const r=await fetch(`${SERVER}/comments?videoId=${video.id}`);
+    const d=await r.json();
+    const comments=[];
+    d.items?.forEach(item=>{
+      const top=item.snippet.topLevelComment.snippet;
+      comments.push({videoId:video.id,videoTitle:video.snippet.title,text:top.textDisplay,likes:top.likeCount,author:top.authorDisplayName});
+    });
+    state.videoComments=comments;
+    state.status=`${comments.length} comments loaded ✓`; state.busy=false; render();
+    if (comments.length) {
+      state.busy=true; state.status="Running AI analysis..."; render();
+      const sr=await fetch(`${SERVER}/sentiment`,{
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ comments, goal:state.goal||"", creatorType:state.creatorType||"" })
+      });
+      if (sr.ok) { state.videoSentiment=await sr.json(); state.status="Analysis complete ✓"; }
+    }
+  } catch(e) { state.status="Error: "+e.message; }
+  state.busy=false; render();
+}
+
+function closeVideo() { state.screen="dashboard"; state.selectedVideo=null; state.videoSentiment=null; state.videoComments=[]; render(); }
 function setTab(t) { state.tab=t; render(); }
+function toggleSpam() { state.spamVisible=!state.spamVisible; render(); }
+
+function sentimentBlock(s) {
+  if (!s) return "";
+  return `
+    ${s.pipelineStats?`
+    <div class="dark-card">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#3b82f6;margin-bottom:10px">🔬 Pipeline Report</div>
+      <div class="pipeline-grid">
+        <div class="pipeline-stat"><div class="pipeline-val" style="color:#10b981">${s.pipelineStats.afterSpamFilter}</div><div class="pipeline-lbl">Analysed</div></div>
+        <div class="pipeline-stat"><div class="pipeline-val" style="color:#ef4444">${s.pipelineStats.spamRemoved}</div><div class="pipeline-lbl">Spam removed</div></div>
+        <div class="pipeline-stat"><div class="pipeline-val" style="color:#3b82f6">${s.pipelineStats.translated}</div><div class="pipeline-lbl">Translated</div></div>
+        <div class="pipeline-stat"><div class="pipeline-val" style="color:#f59e0b">${s.pipelineStats.total}</div><div class="pipeline-lbl">Total fetched</div></div>
+      </div>
+    </div>`:""}
+
+    ${s.mostLiked?`
+    <div class="card" style="border-left:4px solid #f59e0b">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#f59e0b;margin-bottom:8px">⭐ Most Liked Comment</div>
+      <div style="font-size:13px;color:#0f172a;font-style:italic;margin-bottom:8px">"${s.mostLiked.text}"</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:11px;font-weight:700;color:#3b82f6">${s.mostLiked.author}</div>
+        <span style="font-size:12px;font-weight:700;color:#f59e0b">👍 ${s.mostLiked.likes.toLocaleString()}</span>
+      </div>
+    </div>`:""}
+
+    <div class="card">
+      <div class="card-title">Overall Sentiment</div>
+      <div class="sentiment-bars">
+        ${[{l:"Positive",p:s.positive,c:"#10b981"},{l:"Neutral",p:s.neutral,c:"#f59e0b"},{l:"Negative",p:s.negative,c:"#ef4444"}].map(x=>`
+          <div class="sentiment-bar">
+            <div class="sentiment-pct" style="color:${x.c}">${x.p}%</div>
+            <div class="sentiment-label">${x.l}</div>
+            <div class="progress"><div class="progress-fill" style="width:${x.p}%;background:${x.c}"></div></div>
+          </div>`).join("")}
+      </div>
+    </div>
+
+    ${s.audiencePersonality?`
+    <div class="card" style="border-left:4px solid #8b5cf6">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#8b5cf6;margin-bottom:8px">👥 Audience Personality</div>
+      <p style="font-size:13px;color:#475569;line-height:1.7;margin:0">${s.audiencePersonality}</p>
+    </div>`:""}
+
+    ${s.contentStrengths?.length||s.contentWeaknesses?.length?`
+    <div class="sw-grid">
+      ${s.contentStrengths?.length?`<div class="sw-card" style="border-left:4px solid #10b981"><div class="sw-title" style="color:#10b981">✅ Strengths</div>${s.contentStrengths.map(x=>`<div class="sw-item">${x}</div>`).join("")}</div>`:""}
+      ${s.contentWeaknesses?.length?`<div class="sw-card" style="border-left:4px solid #ef4444"><div class="sw-title" style="color:#ef4444">⚠️ Weaknesses</div>${s.contentWeaknesses.map(x=>`<div class="sw-item">${x}</div>`).join("")}</div>`:""}
+    </div>`:""}
+
+    ${(s.themes||[]).map(th=>{
+      const tc=th.sentiment==="positive"?"#10b981":th.sentiment==="negative"?"#ef4444":"#f59e0b";
+      return`<div class="theme-card">
+        <div class="theme-header">
+          <div style="font-size:13px;font-weight:700">${th.theme}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            ${th.weight?`<span style="background:#0f172a;color:#94a3b8;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700">weight ${th.weight}/10</span>`:""}
+            <span class="pill" style="background:${tc}22;color:${tc}">${th.sentiment} · ${th.count}</span>
+          </div>
+        </div>
+        ${(th.examples||[]).map(ex=>`<div class="quote">"${ex}"</div>`).join("")}
+      </div>`;
+    }).join("")}
+
+    <div class="dark-card">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#3b82f6;margin-bottom:10px">🤖 What your comments are telling you</div>
+      <p style="color:#cbd5e1;font-size:13px;line-height:1.85;margin-bottom:16px">${s.summary}</p>
+      ${s.quickWins?.length?`
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#f59e0b;margin-bottom:10px">⚡ Quick wins</div>
+        ${s.quickWins.map(w=>`<div class="quick-win"><span style="color:#10b981;font-weight:800;flex-shrink:0">→</span><p style="font-size:12px;color:#94a3b8;line-height:1.65;margin:0">${w}</p></div>`).join("")}`:""}
+    </div>
+
+    ${s.spamSample?.length?`
+    <div class="card">
+      <div class="collapsible-header" onclick="toggleSpam()">
+        <div style="font-size:13px;font-weight:700">🚫 Filtered spam (${s.spamSample.length})</div>
+        <span style="font-size:11px;color:#64748b">${state.spamVisible?"Hide ▲":"Show ▼"}</span>
+      </div>
+      <div class="collapsible-content ${state.spamVisible?"open":""}">
+        <p style="font-size:11px;color:#64748b;margin-bottom:10px;line-height:1.5">These comments were removed before analysis. Review them to check if any valid comments were incorrectly filtered.</p>
+        ${s.spamSample.map(c=>`
+          <div class="spam-card">
+            <div class="spam-reason">${c.spamReason||"Spam"}</div>
+            <div style="font-size:12px;color:#92400e;line-height:1.5">${c.text||"(empty)"}</div>
+            <div style="font-size:10px;color:#b45309;margin-top:4px">${(c.videoTitle||"").slice(0,40)}</div>
+          </div>`).join("")}
+      </div>
+    </div>`:""}`;
+}
 
 function renderOnboard() {
   document.getElementById("app").innerHTML=`
     <div class="onboard">
-      <div class="onboard-logo">
-        <div class="onboard-logo-box">YT</div>
-        <span class="onboard-logo-text">ChannelIQ</span>
-      </div>
+      <div class="onboard-logo"><div class="onboard-logo-box">YT</div><span class="onboard-logo-text">ChannelIQ</span></div>
       <div class="onboard-card">
         <div class="onboard-title">Understand your channel</div>
         <div class="onboard-sub">Enter your YouTube handle to see AI-powered insights for free.</div>
@@ -358,11 +437,8 @@ function renderOnboard() {
 }
 
 function renderTeaser() {
-  const ch=state.channel;
-  const snip=ch.snippet||{};
-  const st=ch.statistics||{};
-  const subs=parseInt(st.subscriberCount||0);
-  const views=parseInt(st.viewCount||0);
+  const ch=state.channel, snip=ch.snippet||{}, st=ch.statistics||{};
+  const subs=parseInt(st.subscriberCount||0), views=parseInt(st.viewCount||0);
   const fakeKpis=[
     {label:"Subscribers",value:fmt(subs),color:"#3b82f6",icon:"👥",blur:false},
     {label:"Total Views",value:fmt(views),color:"#10b981",icon:"👁",blur:false},
@@ -374,27 +450,17 @@ function renderTeaser() {
   document.getElementById("app").innerHTML=`
     <div class="teaser">
       <div class="teaser-topbar">
-        <div style="display:flex;align-items:center;gap:8px">
-          <div class="logo-box">YT</div>
-          <span style="color:#f1f5f9;font-weight:700;font-size:14px">ChannelIQ</span>
-        </div>
+        <div style="display:flex;align-items:center;gap:8px"><div class="logo-box">YT</div><span style="color:#f1f5f9;font-weight:700;font-size:14px">ChannelIQ</span></div>
         <button class="signout-btn" onclick="state.screen='onboard';render()">← Change channel</button>
       </div>
       <div class="teaser-body">
         <div class="teaser-channel">
           ${snip.thumbnails?.default?.url?`<img class="teaser-avatar" src="${snip.thumbnails.default.url}"/>`:`<div class="teaser-avatar" style="display:flex;align-items:center;justify-content:center;font-size:20px">📺</div>`}
-          <div>
-            <div class="teaser-name">${snip.title||"Your Channel"}</div>
-            <div class="teaser-handle">@${snip.customUrl?.replace("@","")||""} · ${getTierLabel(state.tier)} tier</div>
-          </div>
+          <div><div class="teaser-name">${snip.title||"Your Channel"}</div><div class="teaser-handle">@${snip.customUrl?.replace("@","")||""} · ${getTierLabel(state.tier)} tier</div></div>
         </div>
         <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#64748b;margin-bottom:8px">Your KPIs — sign in to unlock all</div>
         <div class="teaser-kpi-grid">
-          ${fakeKpis.map(k=>`
-            <div class="teaser-kpi" style="border-left-color:${k.color}">
-              <div class="teaser-kpi-label">${k.icon} ${k.label}</div>
-              <div class="teaser-kpi-value ${k.blur?"blurred":""}" style="color:${k.color}">${k.value}</div>
-            </div>`).join("")}
+          ${fakeKpis.map(k=>`<div class="teaser-kpi" style="border-left-color:${k.color}"><div class="teaser-kpi-label">${k.icon} ${k.label}</div><div class="teaser-kpi-value ${k.blur?"blurred":""}" style="color:${k.color}">${k.value}</div></div>`).join("")}
         </div>
         <div class="unlock-banner">
           <div style="font-size:28px;margin-bottom:8px">🔓</div>
@@ -419,13 +485,69 @@ function renderTeaser() {
     </div>`;
 }
 
+function renderVideoDetail() {
+  const v=state.selectedVideo;
+  if (!v) return;
+  const views=parseInt(v.statistics?.viewCount||0);
+  const likes=parseInt(v.statistics?.likeCount||0);
+  const comms=parseInt(v.statistics?.commentCount||0);
+  const eng=views?((likes+comms)/views*100).toFixed(1):"0.0";
+  const ec=parseFloat(eng)>5?"#10b981":parseFloat(eng)>2?"#f59e0b":"#94a3b8";
+  const snip=state.channel?.snippet||{};
+  const subs=parseInt(state.channel?.statistics?.subscriberCount||0);
+
+  document.getElementById("app").innerHTML=`
+    <div style="min-height:100vh;background:#f1f5f9">
+      <div class="topbar">
+        <div class="logo"><div class="logo-box">YT</div><span class="logo-text">ChannelIQ</span></div>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${state.status?`<span class="status-pill">${state.status}</span>`:""}
+          <button class="signout-btn" onclick="signOut()">Sign out</button>
+        </div>
+      </div>
+      <div class="body">
+        <div class="video-detail-header">
+          <button class="back-btn" onclick="closeVideo()">← Back</button>
+          <div style="font-size:13px;font-weight:700;color:#0f172a;line-height:1.3">${v.snippet.title}</div>
+        </div>
+
+        <img src="${v.snippet.thumbnails?.medium?.url||v.snippet.thumbnails?.default?.url||""}" style="width:100%;border-radius:12px;margin-bottom:12px;object-fit:cover;max-height:180px" onerror="this.style.display='none'"/>
+
+        <div style="font-size:10px;color:#94a3b8;margin-bottom:12px">${fmtDate(v.snippet.publishedAt)} · ${fmtDur(v.contentDetails?.duration)}</div>
+
+        <div class="stat-grid" style="margin-bottom:16px">
+          <div class="stat-box"><div class="stat-val" style="color:#3b82f6">${fmt(views)}</div><div class="stat-lbl">Views</div></div>
+          <div class="stat-box"><div class="stat-val" style="color:#10b981">${fmt(likes)}</div><div class="stat-lbl">Likes</div></div>
+          <div class="stat-box"><div class="stat-val" style="color:#f59e0b">${fmt(comms)}</div><div class="stat-lbl">Comments</div></div>
+          <div class="stat-box"><div class="stat-val" style="color:${ec}">${eng}%</div><div class="stat-lbl">Engagement</div></div>
+        </div>
+
+        ${state.busy?`<div style="text-align:center;padding:40px 20px"><div style="font-size:28px;margin-bottom:10px">🤖</div><div style="font-size:14px;font-weight:600;color:#0f172a;margin-bottom:6px">Analysing comments...</div><div style="font-size:12px;color:#64748b">${state.status}</div></div>`:""}
+
+        ${!state.busy&&!state.videoSentiment&&state.videoComments.length===0?`
+        <div class="empty">
+          <div class="empty-icon">💬</div>
+          <div class="empty-title">No comments found</div>
+          <div class="empty-text">This video may have comments disabled or no comments yet.</div>
+        </div>`:""}
+
+        ${!state.busy&&state.videoSentiment?sentimentBlock(state.videoSentiment):""}
+
+        ${!state.busy&&state.videoComments.length&&!state.videoSentiment?`
+        <div class="empty">
+          <div class="empty-icon">🤖</div>
+          <div class="empty-title">${state.videoComments.length} comments loaded</div>
+          <div class="empty-text">Sentiment analysis failed. Try again.</div>
+          <button class="btn" onclick="openVideo(state.selectedVideo)">Retry analysis</button>
+        </div>`:""}
+      </div>
+    </div>`;
+}
+
 function renderDashboard() {
   const {channel,videos,comments,sentiment,tab,status,busy,tier}=state;
-  const st=channel.statistics||{};
-  const snip=channel.snippet||{};
-  const subs=parseInt(st.subscriberCount||0);
-  const totViews=parseInt(st.viewCount||0);
-  const vidCount=parseInt(st.videoCount||0);
+  const st=channel.statistics||{}, snip=channel.snippet||{};
+  const subs=parseInt(st.subscriberCount||0), totViews=parseInt(st.viewCount||0), vidCount=parseInt(st.videoCount||0);
   const totLikes=videos.reduce((s,v)=>s+parseInt(v.statistics?.likeCount||0),0);
   const totComms=videos.reduce((s,v)=>s+parseInt(v.statistics?.commentCount||0),0);
   const vidViews=videos.reduce((s,v)=>s+parseInt(v.statistics?.viewCount||0),0);
@@ -443,14 +565,7 @@ function renderDashboard() {
   ];
 
   const sortedVideos=[...videos].sort((a,b)=>parseInt(b.statistics?.viewCount||0)-parseInt(a.statistics?.viewCount||0));
-
-  const lockedOverlay=(required,feature)=>`
-    <div class="locked-overlay">
-      <div style="font-size:22px">🔒</div>
-      <div class="locked-text">${feature}</div>
-      <div class="locked-sub">Available on ${required.charAt(0).toUpperCase()+required.slice(1)} tier</div>
-      <button class="upgrade-btn">Upgrade to unlock</button>
-    </div>`;
+  const lockedOverlay=(required,feature)=>`<div class="locked-overlay"><div style="font-size:22px">🔒</div><div class="locked-text">${feature}</div><div class="locked-sub">Available on ${required.charAt(0).toUpperCase()+required.slice(1)} tier</div><button class="upgrade-btn">Upgrade to unlock</button></div>`;
 
   const tabContent={
     overview:`
@@ -475,14 +590,34 @@ function renderDashboard() {
       </div>
       ${isLocked("silver")?`<div class="locked-card" style="height:100px"><div class="card-title">Posting time vs audience insights</div>${lockedOverlay("silver","Posting Time Analysis")}</div>`:""}`,
 
-    videos:sortedVideos.map(v=>{
-      const views=parseInt(v.statistics?.viewCount||0);
-      const likes=parseInt(v.statistics?.likeCount||0);
-      const comms=parseInt(v.statistics?.commentCount||0);
-      const eng=views?((likes+comms)/views*100).toFixed(1):"0.0";
-      const ec=parseFloat(eng)>5?"#10b981":parseFloat(eng)>2?"#f59e0b":"#94a3b8";
-      return`<div class="video-card"><div style="display:flex;gap:10px;margin-bottom:10px"><img src="${v.snippet.thumbnails?.medium?.url||v.snippet.thumbnails?.default?.url||""}" class="video-thumb" onerror="this.style.display='none'"/><div style="flex:1"><div style="font-size:12px;font-weight:700;line-height:1.3;margin-bottom:3px">${v.snippet.title}</div><div style="font-size:10px;color:#94a3b8">${fmtDate(v.snippet.publishedAt)} · ${fmtDur(v.contentDetails?.duration)}</div></div></div><div class="stat-grid"><div class="stat-box"><div class="stat-val" style="color:#3b82f6">${fmt(views)}</div><div class="stat-lbl">Views</div></div><div class="stat-box"><div class="stat-val" style="color:#10b981">${fmt(likes)}</div><div class="stat-lbl">Likes</div></div><div class="stat-box"><div class="stat-val" style="color:#f59e0b">${fmt(comms)}</div><div class="stat-lbl">Cmts</div></div><div class="stat-box"><div class="stat-val" style="color:${ec}">${eng}%</div><div class="stat-lbl">Eng</div></div></div></div>`;
-    }).join(""),
+    videos:`
+      <div class="card" style="margin-bottom:12px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px">Your videos</div>
+        <div style="font-size:11px;color:#64748b">Tap any video for a full breakdown and sentiment analysis</div>
+      </div>
+      ${sortedVideos.map(v=>{
+        const views=parseInt(v.statistics?.viewCount||0);
+        const likes=parseInt(v.statistics?.likeCount||0);
+        const comms=parseInt(v.statistics?.commentCount||0);
+        const eng=views?((likes+comms)/views*100).toFixed(1):"0.0";
+        const ec=parseFloat(eng)>5?"#10b981":parseFloat(eng)>2?"#f59e0b":"#94a3b8";
+        return`<div class="video-card" onclick="openVideo(${JSON.stringify(v).replace(/"/g,'&quot;')})">
+          <div style="display:flex;gap:10px;margin-bottom:10px">
+            <img src="${v.snippet.thumbnails?.medium?.url||v.snippet.thumbnails?.default?.url||""}" class="video-thumb" onerror="this.style.display='none'"/>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:700;line-height:1.3;margin-bottom:3px">${v.snippet.title}</div>
+              <div style="font-size:10px;color:#94a3b8">${fmtDate(v.snippet.publishedAt)} · ${fmtDur(v.contentDetails?.duration)}</div>
+            </div>
+            <div style="font-size:16px;color:#94a3b8;flex-shrink:0">→</div>
+          </div>
+          <div class="stat-grid">
+            <div class="stat-box"><div class="stat-val" style="color:#3b82f6">${fmt(views)}</div><div class="stat-lbl">Views</div></div>
+            <div class="stat-box"><div class="stat-val" style="color:#10b981">${fmt(likes)}</div><div class="stat-lbl">Likes</div></div>
+            <div class="stat-box"><div class="stat-val" style="color:#f59e0b">${fmt(comms)}</div><div class="stat-lbl">Cmts</div></div>
+            <div class="stat-box"><div class="stat-val" style="color:${ec}">${eng}%</div><div class="stat-lbl">Eng</div></div>
+          </div>
+        </div>`;
+      }).join("")}`,
 
     comments:!comments.length?`<div class="empty"><div class="empty-icon">💬</div><div class="empty-title">No comments loaded</div><div class="empty-text">Fetch your comments to view them and run AI analysis.</div><button class="btn" onclick="fetchComments()" ${busy?"disabled":""}>Fetch comments →</button></div>`:`
       <div class="card" style="display:flex;justify-content:space-between;align-items:center">
@@ -491,95 +626,7 @@ function renderDashboard() {
       </div>
       ${comments.slice(0,50).map(cm=>`<div class="comment-card"><div style="font-size:11px;font-weight:700;color:#3b82f6;margin-bottom:4px">${cm.author}</div><div style="font-size:12px;color:#475569;line-height:1.5;margin-bottom:4px">${cm.text}</div><div style="font-size:10px;color:#94a3b8">${(cm.videoTitle||"").slice(0,50)}</div></div>`).join("")}`,
 
-    sentiment:!sentiment?`
-      <div class="empty">
-        <div class="empty-icon">🤖</div>
-        <div class="empty-title">AI Sentiment Analysis</div>
-        <div class="empty-text">${comments.length?`${comments.length} comments ready.`:"Fetch comments first."}</div>
-        <button class="btn" onclick="${comments.length?"runSentiment()":"fetchComments()"}" ${busy?"disabled":""}>
-          ${busy?(comments.length?"Analysing...":"Fetching..."):comments.length?"Run AI analysis →":"Fetch comments first →"}
-        </button>
-      </div>`:`
-
-      ${sentiment.pipelineStats?`
-      <div class="dark-card">
-        <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#3b82f6;margin-bottom:10px">🔬 Pipeline Report</div>
-        <div class="pipeline-grid">
-          <div class="pipeline-stat"><div class="pipeline-val" style="color:#10b981">${sentiment.pipelineStats.afterSpamFilter}</div><div class="pipeline-lbl">Comments analysed</div></div>
-          <div class="pipeline-stat"><div class="pipeline-val" style="color:#ef4444">${sentiment.pipelineStats.spamRemoved}</div><div class="pipeline-lbl">Spam removed</div></div>
-          <div class="pipeline-stat"><div class="pipeline-val" style="color:#3b82f6">${sentiment.pipelineStats.translated}</div><div class="pipeline-lbl">Translated</div></div>
-          <div class="pipeline-stat"><div class="pipeline-val" style="color:#f59e0b">${sentiment.pipelineStats.total}</div><div class="pipeline-lbl">Total fetched</div></div>
-        </div>
-      </div>`:""}
-
-      ${sentiment.mostLiked?`
-      <div class="card" style="border-left:4px solid #f59e0b">
-        <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#f59e0b;margin-bottom:8px">⭐ Most Liked Comment</div>
-        <div style="font-size:13px;color:#0f172a;font-style:italic;margin-bottom:8px">"${sentiment.mostLiked.text}"</div>
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div style="font-size:11px;font-weight:700;color:#3b82f6">${sentiment.mostLiked.author}</div>
-          <div style="display:flex;align-items:center;gap:6px">
-            <span style="font-size:12px">👍</span>
-            <span style="font-size:12px;font-weight:700;color:#f59e0b">${sentiment.mostLiked.likes.toLocaleString()} likes</span>
-          </div>
-        </div>
-        <div style="font-size:10px;color:#94a3b8;margin-top:4px">${(sentiment.mostLiked.videoTitle||"").slice(0,50)}</div>
-      </div>`:""}
-
-      <div class="card">
-        <div class="card-title">Overall Sentiment</div>
-        <div class="sentiment-bars">
-          ${[{l:"Positive",p:sentiment.positive,c:"#10b981"},{l:"Neutral",p:sentiment.neutral,c:"#f59e0b"},{l:"Negative",p:sentiment.negative,c:"#ef4444"}].map(s=>`
-            <div class="sentiment-bar">
-              <div class="sentiment-pct" style="color:${s.c}">${s.p}%</div>
-              <div class="sentiment-label">${s.l}</div>
-              <div class="progress"><div class="progress-fill" style="width:${s.p}%;background:${s.c}"></div></div>
-            </div>`).join("")}
-        </div>
-      </div>
-
-      ${sentiment.audiencePersonality?`
-      <div class="card" style="border-left:4px solid #8b5cf6">
-        <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#8b5cf6;margin-bottom:8px">👥 Audience Personality</div>
-        <p style="font-size:13px;color:#475569;line-height:1.7;margin:0">${sentiment.audiencePersonality}</p>
-      </div>`:""}
-
-      ${sentiment.contentStrengths?.length||sentiment.contentWeaknesses?.length?`
-      <div class="sw-grid">
-        ${sentiment.contentStrengths?.length?`
-        <div class="sw-card" style="border-left:4px solid #10b981">
-          <div class="sw-title" style="color:#10b981">✅ Strengths</div>
-          ${sentiment.contentStrengths.map(s=>`<div class="sw-item">${s}</div>`).join("")}
-        </div>`:""}
-        ${sentiment.contentWeaknesses?.length?`
-        <div class="sw-card" style="border-left:4px solid #ef4444">
-          <div class="sw-title" style="color:#ef4444">⚠️ Weaknesses</div>
-          ${sentiment.contentWeaknesses.map(s=>`<div class="sw-item">${s}</div>`).join("")}
-        </div>`:""}
-      </div>`:""}
-
-      ${(sentiment.themes||[]).map(th=>{
-        const tc=th.sentiment==="positive"?"#10b981":th.sentiment==="negative"?"#ef4444":"#f59e0b";
-        return`<div class="theme-card">
-          <div class="theme-header">
-            <div style="font-size:13px;font-weight:700">${th.theme}</div>
-            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-              ${th.weight?`<span style="background:#0f172a;color:#94a3b8;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700">weight ${th.weight}/10</span>`:""}
-              <span class="pill" style="background:${tc}22;color:${tc}">${th.sentiment} · ${th.count}</span>
-            </div>
-          </div>
-          ${(th.examples||[]).map(ex=>`<div class="quote">"${ex}"</div>`).join("")}
-        </div>`;
-      }).join("")}
-
-      <div class="dark-card">
-        <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#3b82f6;margin-bottom:10px">🤖 What your comments are telling you</div>
-        <p style="color:#cbd5e1;font-size:13px;line-height:1.85;margin-bottom:16px">${sentiment.summary}</p>
-        ${sentiment.quickWins?.length?`
-          <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#f59e0b;margin-bottom:10px">⚡ Quick wins</div>
-          ${sentiment.quickWins.map(w=>`<div class="quick-win"><span style="color:#10b981;font-weight:800;flex-shrink:0">→</span><p style="font-size:12px;color:#94a3b8;line-height:1.65;margin:0">${w}</p></div>`).join("")}`:""}
-      </div>
-      ${isLocked("silver")?`<div class="locked-card" style="height:100px"><div class="card-title">Sentiment over time</div>${lockedOverlay("silver","Sentiment Trends")}</div>`:""}`,
+    sentiment:!sentiment?`<div class="empty"><div class="empty-icon">🤖</div><div class="empty-title">AI Sentiment Analysis</div><div class="empty-text">${comments.length?`${comments.length} comments ready.`:"Fetch comments first."}</div><button class="btn" onclick="${comments.length?"runSentiment()":"fetchComments()"}" ${busy?"disabled":""}>${busy?(comments.length?"Analysing...":"Fetching..."):comments.length?"Run AI analysis →":"Fetch comments first →"}</button></div>`:sentimentBlock(sentiment)+`${isLocked("silver")?`<div class="locked-card" style="height:100px"><div class="card-title">Sentiment over time</div>${lockedOverlay("silver","Sentiment Trends")}</div>`:""}`,
   };
 
   document.getElementById("app").innerHTML=`
@@ -610,12 +657,10 @@ function renderDashboard() {
 }
 
 function render() {
-  if (state.screen==="loading") {
-    document.getElementById("app").innerHTML=`<div class="loading"><div style="font-size:40px">📡</div><div class="loading-text">ChannelIQ</div><div class="loading-sub">${state.status||"Loading..."}</div></div>`;
-    return;
-  }
+  if (state.screen==="loading") { document.getElementById("app").innerHTML=`<div class="loading"><div style="font-size:40px">📡</div><div class="loading-text">ChannelIQ</div><div class="loading-sub">${state.status||"Loading..."}</div></div>`; return; }
   if (state.screen==="onboard") { renderOnboard(); return; }
   if (state.screen==="teaser") { renderTeaser(); return; }
+  if (state.screen==="videodetail") { renderVideoDetail(); return; }
   if (state.screen==="dashboard") { renderDashboard(); return; }
 }
 

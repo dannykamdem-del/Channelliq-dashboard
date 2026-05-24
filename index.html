@@ -68,6 +68,9 @@ body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; 
 .tier-badge-bronze { background: #92400e22; color: #d97706; }
 .tier-badge-silver { background: #47556922; color: #94a3b8; }
 .tier-badge-gold { background: #d9770622; color: #f59e0b; }
+.goals-indicator { display: flex; align-items: center; gap: 4px; background: #1e3a5f; border: 1px solid #3b82f6; border-radius: 20px; padding: 3px 10px; cursor: pointer; }
+.goals-indicator-dot { width: 6px; height: 6px; border-radius: 50%; background: #3b82f6; }
+.goals-indicator-text { font-size: 10px; color: #3b82f6; font-weight: 600; }
 .body { padding: 16px 14px 64px; max-width: 600px; margin: 0 auto; }
 .banner { background: #0f172a; border: 1.5px solid #1e3a5f; border-radius: 16px; padding: 18px 20px; margin-bottom: 16px; }
 .banner-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #3b82f6; margin-bottom: 8px; }
@@ -117,7 +120,6 @@ body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; 
 .insight-body { font-size: 11px; color: #94a3b8; line-height: 1.6; }
 .btn { padding: 11px 22px; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; color: white; background: #3b82f6; }
 .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-.btn-sm { padding: 6px 14px; border: none; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; font-family: inherit; color: white; background: #3b82f6; }
 .empty { text-align: center; padding: 36px 20px; }
 .empty-icon { font-size: 32px; margin-bottom: 10px; }
 .empty-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
@@ -146,39 +148,96 @@ body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; 
 .collapsible-content.open { display: block; }
 .video-detail-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
 .back-btn { background: #1e293b; color: #94a3b8; border: none; border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; flex-shrink: 0; }
-/* DATE RANGE */
 .date-range-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
-.date-pill { padding: 6px 14px; border-radius: 20px; border: 1.5px solid #e2e8f0; background: white; font-size: 11px; font-weight: 600; color: #64748b; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+.date-pill { padding: 6px 14px; border-radius: 20px; border: 1.5px solid #e2e8f0; background: white; font-size: 11px; font-weight: 600; color: #64748b; cursor: pointer; font-family: inherit; }
 .date-pill.active { background: #0f172a; color: #f1f5f9; border-color: #0f172a; }
-/* ADVANCED ANALYTICS */
-.adv-section-title { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #64748b; margin-bottom: 10px; margin-top: 4px; }
+.adv-section-title { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #64748b; margin-bottom: 10px; }
 .metric-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid #f1f5f9; }
 .metric-row:last-child { border-bottom: none; }
 .metric-label { font-size: 12px; color: #475569; }
 .metric-value { font-size: 13px; font-weight: 700; color: #0f172a; font-family: monospace; }
-.metric-delta { font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 20px; }
-.delta-up { background: #dcfce7; color: #166534; }
-.delta-down { background: #fee2e2; color: #991b1b; }
-.delta-flat { background: #f1f5f9; color: #64748b; }
 .horiz-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
 .horiz-bar-label { font-size: 11px; color: #475569; min-width: 80px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .horiz-bar-track { flex: 1; height: 8px; background: #f1f5f9; border-radius: 4px; overflow: hidden; }
-.horiz-bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+.horiz-bar-fill { height: 100%; border-radius: 4px; }
 .horiz-bar-val { font-size: 11px; font-weight: 700; color: #0f172a; font-family: monospace; min-width: 44px; text-align: right; }
 .day-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; margin-top: 8px; }
 .day-cell { border-radius: 6px; padding: 8px 4px; text-align: center; }
 .day-name { font-size: 9px; color: #94a3b8; margin-bottom: 4px; }
 .day-val { font-size: 11px; font-weight: 800; font-family: monospace; }
 .connect-cta { background: linear-gradient(135deg, #1e3a5f, #1e293b); border: 1.5px solid #3b82f6; border-radius: 16px; padding: 20px; margin-bottom: 12px; }
-.connect-cta-title { font-size: 14px; font-weight: 700; color: #f1f5f9; margin-bottom: 6px; }
-.connect-cta-sub { font-size: 12px; color: #64748b; line-height: 1.6; margin-bottom: 14px; }
-.connect-cta-features { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
-.connect-cta-feature { font-size: 12px; color: #94a3b8; display: flex; align-items: center; gap: 8px; }
+.connect-cta-feature { font-size: 12px; color: #94a3b8; display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
 .length-bucket { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
 .length-bucket:last-child { border-bottom: none; }
 .length-label { font-size: 12px; color: #475569; font-weight: 500; }
 .length-count { font-size: 11px; color: #94a3b8; margin-top: 2px; }
 .length-avg { font-size: 12px; font-weight: 700; color: #0f172a; font-family: monospace; }
+
+/* ── GOAL PROMPT BANNER ── */
+.goal-prompt {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 90;
+  background: #0f172a; border-top: 1.5px solid #1e3a5f;
+  padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+  transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+  max-width: 600px; margin: 0 auto;
+}
+.goal-prompt.visible { transform: translateY(0); }
+.goal-prompt-text { flex: 1; }
+.goal-prompt-title { font-size: 13px; font-weight: 700; color: #f1f5f9; margin-bottom: 2px; }
+.goal-prompt-sub { font-size: 11px; color: #64748b; line-height: 1.4; }
+.goal-prompt-btn { padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; flex-shrink: 0; }
+.goal-prompt-dismiss { background: none; border: none; color: #475569; font-size: 18px; cursor: pointer; flex-shrink: 0; padding: 0; line-height: 1; }
+
+/* ── GOAL FLOW OVERLAY ── */
+.goal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(15,23,42,0.95);
+  display: flex; flex-direction: column;
+  overflow-y: auto;
+}
+.goal-flow { max-width: 480px; margin: 0 auto; padding: 24px 20px 40px; width: 100%; }
+.goal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+.goal-header-left { display: flex; align-items: center; gap: 10px; }
+.goal-logo-box { width: 28px; height: 28px; background: #ef4444; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: white; }
+.goal-logo-text { font-size: 15px; font-weight: 700; color: #f1f5f9; }
+.goal-close { background: #1e293b; border: none; color: #64748b; border-radius: 8px; padding: 6px 12px; font-size: 12px; cursor: pointer; font-family: inherit; }
+.goal-progress { display: flex; gap: 6px; margin-bottom: 28px; }
+.goal-progress-step { flex: 1; height: 3px; border-radius: 2px; background: #1e293b; transition: background 0.3s; }
+.goal-progress-step.done { background: #3b82f6; }
+.goal-progress-step.active { background: #3b82f6; opacity: 0.5; }
+.goal-step-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #3b82f6; margin-bottom: 8px; }
+.goal-step-title { font-size: 20px; font-weight: 800; color: #f1f5f9; margin-bottom: 6px; line-height: 1.3; }
+.goal-step-sub { font-size: 13px; color: #64748b; margin-bottom: 24px; line-height: 1.6; }
+.goal-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+.goal-option { display: flex; align-items: center; gap: 14px; background: #1e293b; border: 1.5px solid #334155; border-radius: 14px; padding: 14px 16px; cursor: pointer; transition: all 0.15s; }
+.goal-option:hover { border-color: #3b82f6; }
+.goal-option.selected { border-color: #3b82f6; background: #1e3a5f; }
+.goal-option-icon { font-size: 22px; flex-shrink: 0; }
+.goal-option-label { font-size: 14px; font-weight: 600; color: #f1f5f9; }
+.goal-option-sub { font-size: 11px; color: #64748b; margin-top: 2px; }
+.goal-option-check { margin-left: auto; width: 20px; height: 20px; border-radius: 50%; border: 2px solid #334155; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.goal-option.selected .goal-option-check { background: #3b82f6; border-color: #3b82f6; }
+.goal-next-btn { width: 100%; padding: 14px; background: #3b82f6; color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity 0.2s; }
+.goal-next-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.goal-skip { display: block; text-align: center; font-size: 12px; color: #475569; margin-top: 14px; cursor: pointer; background: none; border: none; font-family: inherit; width: 100%; }
+
+/* Video selector for Q4 */
+.video-select-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; max-height: 340px; overflow-y: auto; }
+.video-select-item { display: flex; align-items: center; gap: 12px; background: #1e293b; border: 1.5px solid #334155; border-radius: 12px; padding: 10px 12px; cursor: pointer; transition: all 0.15s; }
+.video-select-item:hover { border-color: #3b82f6; }
+.video-select-item.selected { border-color: #3b82f6; background: #1e3a5f; }
+.video-select-thumb { width: 56px; height: 32px; object-fit: cover; border-radius: 6px; flex-shrink: 0; background: #334155; }
+.video-select-title { font-size: 12px; font-weight: 600; color: #f1f5f9; line-height: 1.3; flex: 1; }
+.video-select-check { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #334155; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.video-select-item.selected .video-select-check { background: #3b82f6; border-color: #3b82f6; }
+
+/* Goal summary card */
+.goal-summary-card { background: #1e293b; border: 1.5px solid #1e3a5f; border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+.goal-summary-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.goal-summary-row:last-child { margin-bottom: 0; }
+.goal-summary-icon { font-size: 16px; flex-shrink: 0; }
+.goal-summary-label { font-size: 11px; color: #64748b; }
+.goal-summary-value { font-size: 13px; font-weight: 600; color: #f1f5f9; }
 </style>
 </head>
 <body>
@@ -189,6 +248,22 @@ body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; 
     <div class="loading-sub">Loading...</div>
   </div>
 </div>
+
+<!-- GOAL PROMPT BANNER -->
+<div class="goal-prompt" id="goalPrompt">
+  <div class="goal-prompt-text">
+    <div class="goal-prompt-title">🎯 Personalise your insights</div>
+    <div class="goal-prompt-sub">Tell us your creative goals and we'll use AI to build you a tailored growth plan.</div>
+  </div>
+  <button class="goal-prompt-btn" onclick="openGoalFlow()">Set my goals →</button>
+  <button class="goal-prompt-dismiss" onclick="dismissGoalPrompt()">×</button>
+</div>
+
+<!-- GOAL FLOW OVERLAY -->
+<div class="goal-overlay" id="goalOverlay" style="display:none">
+  <div class="goal-flow" id="goalFlow"></div>
+</div>
+
 <script>
 const SUPABASE_URL = "https://ukirtgdeekjzddvgmizs.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVraXJ0Z2RlZWtqemRkdmdtaXpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1Nzk1NTQsImV4cCI6MjA5NTE1NTU1NH0.jtMsJ7u0oSidFc8A3Iu9BfnuUoqdWOVIvjfBCMp7DXE";
@@ -199,124 +274,226 @@ let state = {
   screen:"loading", user:null, channel:null, handle:"",
   videos:[], comments:[], sentiment:null, tab:"overview",
   status:"", busy:false, tier:"bronze", error:"", backgroundData:null,
-  goal:"", creatorType:"",
+  dateRange:"all",
   selectedVideo:null, videoSentiment:null, videoComments:[],
-  spamVisible:false, dateRange:"all"
+  spamVisible:false,
+  goals: null, // loaded from Supabase
+  goalPromptDismissed: false,
+  goalPromptTimer: null,
 };
 
+// ── GOAL FLOW STATE ───────────────────────────────────────────────────────────
+let goalDraft = { step:1, goal:"", contentType:"", targetAudience:"", referenceVideoIds:[], referenceVideoTitles:[] };
+
+const GOAL_OPTIONS = [
+  { value:"grow_subscribers", icon:"📈", label:"Grow my subscriber count", sub:"Attract new people to my channel consistently" },
+  { value:"increase_views", icon:"👁", label:"Increase my views and reach", sub:"Get more people discovering my content" },
+  { value:"grow_revenue", icon:"💰", label:"Grow my revenue", sub:"Maximise earnings from my content" },
+  { value:"build_community", icon:"💬", label:"Build a stronger community", sub:"Deepen engagement with my existing audience" },
+  { value:"attract_audience", icon:"🎯", label:"Attract a specific audience", sub:"Reach a particular demographic or niche" },
+];
+
+const CONTENT_TYPES = [
+  { value:"education", icon:"🎓", label:"Education / Tutorials", sub:"How-tos, explainers, courses" },
+  { value:"entertainment", icon:"😂", label:"Entertainment / Comedy", sub:"Sketches, reactions, humour" },
+  { value:"gaming", icon:"🎮", label:"Gaming", sub:"Let's plays, reviews, streams" },
+  { value:"music", icon:"🎵", label:"Music / Performance", sub:"Original music, covers, performances" },
+  { value:"news", icon:"📰", label:"News / Commentary", sub:"Current events, opinions, analysis" },
+  { value:"business", icon:"💼", label:"Business / Finance", sub:"Entrepreneurship, investing, careers" },
+  { value:"health", icon:"🏋️", label:"Health / Fitness", sub:"Workouts, nutrition, wellbeing" },
+  { value:"podcast", icon:"🎙️", label:"Podcast / Long-form", sub:"Interviews, discussions, deep dives" },
+  { value:"lifestyle", icon:"📱", label:"Lifestyle / Vlog", sub:"Day-in-the-life, travel, personal" },
+  { value:"creative", icon:"🎨", label:"Creative / Art", sub:"Art, design, crafts, DIY" },
+];
+
+const AUDIENCE_OPTIONS = [
+  { value:"current", icon:"❤️", label:"My current audience", sub:"Deepen loyalty with people who already watch" },
+  { value:"new_niche", icon:"🔍", label:"New viewers in my niche", sub:"Reach people who haven't found me yet" },
+  { value:"young", icon:"⚡", label:"Younger demographic (18–24)", sub:"Gen Z and early millennial viewers" },
+  { value:"professional", icon:"💼", label:"Professional demographic (25–40)", sub:"Career-focused, higher-income viewers" },
+  { value:"us", icon:"🇺🇸", label:"US-based audience", sub:"Higher CPM, stronger monetisation potential" },
+  { value:"uk", icon:"🇬🇧", label:"UK / European audience", sub:"English-speaking, culturally aligned" },
+  { value:"global", icon:"🌍", label:"Global audience", sub:"Maximise total reach across all markets" },
+];
+
 const fmt = n=>n>=1e6?(n/1e6).toFixed(1)+"M":n>=1000?(n/1000).toFixed(1)+"K":String(n||0);
-const fmtDur = (iso="")=>{
-  const m=iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
-  if(!m) return "--";
-  const h=+(m[1]||0),mn=+(m[2]||0),s=+(m[3]||0);
-  return h?`${h}:${String(mn).padStart(2,"0")}:${String(s).padStart(2,"0")}`:`${mn}:${String(s).padStart(2,"0")}`;
-};
-const fmtSecs = s => { const m=Math.floor(s/60),sec=s%60; return `${m}:${String(sec).padStart(2,"0")}`; };
+const fmtDur = (iso="")=>{ const m=iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/); if(!m) return "--"; const h=+(m[1]||0),mn=+(m[2]||0),s=+(m[3]||0); return h?`${h}:${String(mn).padStart(2,"0")}:${String(s).padStart(2,"0")}`:`${mn}:${String(s).padStart(2,"0")}`; };
 const fmtDate = iso=>new Date(iso).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});
 const getTier = subs=>subs>=100000?"gold":subs>=10000?"silver":"bronze";
 const getTierLabel = t=>t==="gold"?"🥇 Gold":t==="silver"?"🥈 Silver":"🥉 Bronze";
 const getTierBadgeClass = t=>`tier-badge tier-badge-${t}`;
 const isLocked = required=>{ const o=["bronze","silver","gold"]; return o.indexOf(state.tier)<o.indexOf(required); };
 const cleanTitle = t=>t.replace(/#\S+/g,"").replace(/\s+/g," ").trim();
+const goalLabel = v=>GOAL_OPTIONS.find(o=>o.value===v)?.label||v;
+const contentLabel = v=>CONTENT_TYPES.find(o=>o.value===v)?.label||v;
+const audienceLabel = v=>AUDIENCE_OPTIONS.find(o=>o.value===v)?.label||v;
 
-// ── DATE RANGE FILTER ────────────────────────────────────────────────────────
-function filterVideosByRange(videos, range) {
-  if (range==="all") return videos;
-  const now = new Date();
-  const days = range==="7"?7:range==="30"?30:range==="90"?90:365;
-  const cutoff = new Date(now.getTime() - days*24*60*60*1000);
-  return videos.filter(v => new Date(v.snippet.publishedAt) >= cutoff);
+// ── GOAL PROMPT ───────────────────────────────────────────────────────────────
+function scheduleGoalPrompt() {
+  if (state.goals || state.goalPromptDismissed) return;
+  if (state.goalPromptTimer) clearTimeout(state.goalPromptTimer);
+  state.goalPromptTimer = setTimeout(()=>{
+    if (!state.goals && !state.goalPromptDismissed) {
+      document.getElementById("goalPrompt").classList.add("visible");
+    }
+  }, 10000);
 }
 
-// ── VIDEO DURATION IN SECONDS ─────────────────────────────────────────────────
-function durationSecs(iso="") {
-  const m=iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
-  if(!m) return 0;
-  return (+(m[1]||0))*3600+(+(m[2]||0))*60+(+(m[3]||0));
+function dismissGoalPrompt() {
+  document.getElementById("goalPrompt").classList.remove("visible");
+  state.goalPromptDismissed = true;
+  if (state.goalPromptTimer) clearTimeout(state.goalPromptTimer);
 }
 
-// ── ADVANCED ANALYTICS CALCULATIONS ──────────────────────────────────────────
-function calcAdvanced(videos) {
-  if (!videos.length) return null;
-
-  // Total metrics
-  const totalViews = videos.reduce((s,v)=>s+parseInt(v.statistics?.viewCount||0),0);
-  const totalLikes = videos.reduce((s,v)=>s+parseInt(v.statistics?.likeCount||0),0);
-  const totalComments = videos.reduce((s,v)=>s+parseInt(v.statistics?.commentCount||0),0);
-  const avgViews = Math.round(totalViews/videos.length);
-  const avgEngRate = totalViews?((totalLikes+totalComments)/totalViews*100).toFixed(2):"0.00";
-
-  // Top performer
-  const topVideo = [...videos].sort((a,b)=>parseInt(b.statistics?.viewCount||0)-parseInt(a.statistics?.viewCount||0))[0];
-
-  // Best day of week analysis
-  const dayBuckets = {Mon:0,Tue:0,Wed:0,Thu:0,Fri:0,Sat:0,Sun:0};
-  const dayCounts = {Mon:0,Tue:0,Wed:0,Thu:0,Fri:0,Sat:0,Sun:0};
-  const dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-  videos.forEach(v => {
-    const day = dayNames[new Date(v.snippet.publishedAt).getDay()];
-    dayBuckets[day] = (dayBuckets[day]||0) + parseInt(v.statistics?.viewCount||0);
-    dayCounts[day] = (dayCounts[day]||0) + 1;
-  });
-  const dayAvgs = Object.entries(dayBuckets).map(([day,total])=>({
-    day, avg: dayCounts[day]?Math.round(total/dayCounts[day]):0, count: dayCounts[day]
-  })).sort((a,b)=>["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].indexOf(a.day)-["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].indexOf(b.day));
-  const bestDay = [...dayAvgs].sort((a,b)=>b.avg-a.avg)[0];
-
-  // Video length buckets
-  const lengthBuckets = [
-    {label:"0–5 min", min:0, max:300},
-    {label:"5–10 min", min:300, max:600},
-    {label:"10–20 min", min:600, max:1200},
-    {label:"20–60 min", min:1200, max:3600},
-    {label:"60 min+", min:3600, max:Infinity},
-  ];
-  const lengthData = lengthBuckets.map(b=>{
-    const matching = videos.filter(v=>{ const s=durationSecs(v.contentDetails?.duration); return s>=b.min && s<b.max; });
-    const totalV = matching.reduce((s,v)=>s+parseInt(v.statistics?.viewCount||0),0);
-    const avgV = matching.length?Math.round(totalV/matching.length):0;
-    const avgEng = matching.length?((matching.reduce((s,v)=>s+parseInt(v.statistics?.likeCount||0)+parseInt(v.statistics?.commentCount||0),0)/Math.max(totalV,1))*100).toFixed(1):"0.0";
-    return {...b, count:matching.length, avgViews:avgV, avgEng};
-  }).filter(b=>b.count>0);
-
-  // Top 5 videos by views with engagement
-  const top5 = [...videos]
-    .sort((a,b)=>parseInt(b.statistics?.viewCount||0)-parseInt(a.statistics?.viewCount||0))
-    .slice(0,5)
-    .map(v=>({
-      title:cleanTitle(v.snippet.title),
-      views:parseInt(v.statistics?.viewCount||0),
-      likes:parseInt(v.statistics?.likeCount||0),
-      comments:parseInt(v.statistics?.commentCount||0),
-      eng:parseInt(v.statistics?.viewCount||0)?((parseInt(v.statistics?.likeCount||0)+parseInt(v.statistics?.commentCount||0))/parseInt(v.statistics?.viewCount||0)*100).toFixed(1):"0.0",
-      date:v.snippet.publishedAt,
-      dur:v.contentDetails?.duration
-    }));
-
-  // Like to view ratio trend (simple: split into halves)
-  const sorted = [...videos].sort((a,b)=>new Date(a.snippet.publishedAt)-new Date(b.snippet.publishedAt));
-  const half = Math.floor(sorted.length/2);
-  const firstHalf = sorted.slice(0,half);
-  const secondHalf = sorted.slice(half);
-  const calcAvgEng = arr => {
-    const v=arr.reduce((s,x)=>s+parseInt(x.statistics?.viewCount||0),0);
-    const e=arr.reduce((s,x)=>s+parseInt(x.statistics?.likeCount||0)+parseInt(x.statistics?.commentCount||0),0);
-    return v?(e/v*100).toFixed(2):"0.00";
-  };
-  const engTrend = firstHalf.length&&secondHalf.length ? {
-    before:calcAvgEng(firstHalf),
-    after:calcAvgEng(secondHalf),
-    direction: parseFloat(calcAvgEng(secondHalf))>=parseFloat(calcAvgEng(firstHalf))?"up":"down"
-  } : null;
-
-  return { totalViews, totalLikes, totalComments, avgViews, avgEngRate, topVideo, dayAvgs, bestDay, lengthData, top5, engTrend };
+// ── GOAL FLOW ─────────────────────────────────────────────────────────────────
+function openGoalFlow() {
+  dismissGoalPrompt();
+  goalDraft = { step:1, goal:state.goals?.goal||"", contentType:state.goals?.content_type||"", targetAudience:state.goals?.target_audience||"", referenceVideoIds:state.goals?.reference_video_ids||[], referenceVideoTitles:state.goals?.reference_video_titles||[] };
+  document.getElementById("goalOverlay").style.display="flex";
+  renderGoalStep();
 }
 
+function closeGoalFlow() {
+  document.getElementById("goalOverlay").style.display="none";
+}
+
+function renderGoalStep() {
+  const flow = document.getElementById("goalFlow");
+  const step = goalDraft.step;
+  const progressHTML = `<div class="goal-progress">${[1,2,3,4].map(i=>`<div class="goal-progress-step ${i<step?"done":i===step?"active":""}"></div>`).join("")}</div>`;
+  const headerHTML = `<div class="goal-header"><div class="goal-header-left"><div class="goal-logo-box">YT</div><span class="goal-logo-text">ChannelIQ</span></div><button class="goal-close" onclick="closeGoalFlow()">Skip for now</button></div>`;
+
+  if (step===1) {
+    flow.innerHTML=`${headerHTML}${progressHTML}
+      <div class="goal-step-label">Step 1 of 4</div>
+      <div class="goal-step-title">What's your primary goal right now?</div>
+      <div class="goal-step-sub">We'll use this to prioritise the metrics and insights that matter most for where you want to go.</div>
+      <div class="goal-options">
+        ${GOAL_OPTIONS.map(o=>`
+          <div class="goal-option ${goalDraft.goal===o.value?"selected":""}" onclick="selectGoal('${o.value}')">
+            <div class="goal-option-icon">${o.icon}</div>
+            <div style="flex:1"><div class="goal-option-label">${o.label}</div><div class="goal-option-sub">${o.sub}</div></div>
+            <div class="goal-option-check">${goalDraft.goal===o.value?`<svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>`:""}
+            </div>
+          </div>`).join("")}
+      </div>
+      <button class="goal-next-btn" onclick="nextGoalStep()" ${goalDraft.goal?"":"disabled"}>Continue →</button>`;
+  }
+
+  else if (step===2) {
+    flow.innerHTML=`${headerHTML}${progressHTML}
+      <div class="goal-step-label">Step 2 of 4</div>
+      <div class="goal-step-title">What type of content do you make?</div>
+      <div class="goal-step-sub">This helps us benchmark your performance against the right creators and tailor recommendations to your format.</div>
+      <div class="goal-options">
+        ${CONTENT_TYPES.map(o=>`
+          <div class="goal-option ${goalDraft.contentType===o.value?"selected":""}" onclick="selectContentType('${o.value}')">
+            <div class="goal-option-icon">${o.icon}</div>
+            <div style="flex:1"><div class="goal-option-label">${o.label}</div><div class="goal-option-sub">${o.sub}</div></div>
+            <div class="goal-option-check">${goalDraft.contentType===o.value?`<svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>`:""}</div>
+          </div>`).join("")}
+      </div>
+      <button class="goal-next-btn" onclick="nextGoalStep()" ${goalDraft.contentType?"":"disabled"}>Continue →</button>
+      <button class="goal-skip" onclick="goalDraft.step=3;renderGoalStep()">Skip this step</button>`;
+  }
+
+  else if (step===3) {
+    flow.innerHTML=`${headerHTML}${progressHTML}
+      <div class="goal-step-label">Step 3 of 4</div>
+      <div class="goal-step-title">Who do you most want to reach?</div>
+      <div class="goal-step-sub">Understanding your target audience lets us give you smarter posting time recommendations and geography-specific growth insights.</div>
+      <div class="goal-options">
+        ${AUDIENCE_OPTIONS.map(o=>`
+          <div class="goal-option ${goalDraft.targetAudience===o.value?"selected":""}" onclick="selectAudience('${o.value}')">
+            <div class="goal-option-icon">${o.icon}</div>
+            <div style="flex:1"><div class="goal-option-label">${o.label}</div><div class="goal-option-sub">${o.sub}</div></div>
+            <div class="goal-option-check">${goalDraft.targetAudience===o.value?`<svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>`:""}</div>
+          </div>`).join("")}
+      </div>
+      <button class="goal-next-btn" onclick="nextGoalStep()" ${goalDraft.targetAudience?"":"disabled"}>Continue →</button>
+      <button class="goal-skip" onclick="goalDraft.step=4;renderGoalStep()">Skip this step</button>`;
+  }
+
+  else if (step===4) {
+    const videos = state.videos||[];
+    flow.innerHTML=`${headerHTML}${progressHTML}
+      <div class="goal-step-label">Step 4 of 4</div>
+      <div class="goal-step-title">Which videos best represent your direction?</div>
+      <div class="goal-step-sub">Select 1–3 videos that feel most "on brand" for where you want to go. We'll use these as your reference set — every insight will be benchmarked against what makes these videos work.</div>
+      <div class="video-select-list">
+        ${videos.length?videos.map(v=>{
+          const isSelected = goalDraft.referenceVideoIds.includes(v.id);
+          const thumb = v.snippet.thumbnails?.medium?.url||v.snippet.thumbnails?.default?.url||"";
+          return`<div class="video-select-item ${isSelected?"selected":""}" onclick="toggleRefVideo('${v.id}','${cleanTitle(v.snippet.title).replace(/'/g,"\\'")}')">
+            ${thumb?`<img class="video-select-thumb" src="${thumb}" onerror="this.style.display='none'"/>`:`<div class="video-select-thumb"></div>`}
+            <div class="video-select-title">${cleanTitle(v.snippet.title)}</div>
+            <div class="video-select-check">${isSelected?`<svg width="10" height="8" viewBox="0 0 10 8"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>`:""}</div>
+          </div>`;
+        }).join(""):`<div style="text-align:center;padding:24px;color:#64748b;font-size:13px">No videos loaded yet</div>`}
+      </div>
+      <button class="goal-next-btn" onclick="saveGoals()">Save my goals ✓</button>
+      <button class="goal-skip" onclick="saveGoals()">Skip — save without reference videos</button>`;
+  }
+}
+
+function selectGoal(v) { goalDraft.goal=v; renderGoalStep(); }
+function selectContentType(v) { goalDraft.contentType=v; renderGoalStep(); }
+function selectAudience(v) { goalDraft.targetAudience=v; renderGoalStep(); }
+function toggleRefVideo(id, title) {
+  const idx = goalDraft.referenceVideoIds.indexOf(id);
+  if (idx>-1) {
+    goalDraft.referenceVideoIds.splice(idx,1);
+    goalDraft.referenceVideoTitles.splice(idx,1);
+  } else if (goalDraft.referenceVideoIds.length<3) {
+    goalDraft.referenceVideoIds.push(id);
+    goalDraft.referenceVideoTitles.push(title);
+  }
+  renderGoalStep();
+}
+function nextGoalStep() { goalDraft.step++; renderGoalStep(); }
+
+async function saveGoals() {
+  if (!state.user) { closeGoalFlow(); return; }
+  try {
+    const payload = {
+      user_id: state.user.id,
+      goal: goalDraft.goal,
+      content_type: goalDraft.contentType,
+      target_audience: goalDraft.targetAudience,
+      reference_video_ids: goalDraft.referenceVideoIds,
+      reference_video_titles: goalDraft.referenceVideoTitles,
+      updated_at: new Date().toISOString()
+    };
+    const { error } = await sb.from("user_goals").upsert(payload, { onConflict:"user_id" });
+    if (!error) {
+      state.goals = payload;
+      closeGoalFlow();
+      render();
+      // Show confirmation
+      const toast = document.createElement("div");
+      toast.style.cssText="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#10b981;color:white;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:700;z-index:300;";
+      toast.textContent="✓ Goals saved — your insights are now personalised";
+      document.body.appendChild(toast);
+      setTimeout(()=>toast.remove(),3000);
+    }
+  } catch(e) { console.error(e); closeGoalFlow(); }
+}
+
+async function loadGoals() {
+  if (!state.user) return;
+  try {
+    const { data } = await sb.from("user_goals").select("*").eq("user_id", state.user.id).single();
+    if (data) state.goals = data;
+  } catch(_) {}
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
 async function init() {
   const { data:{ session } } = await sb.auth.getSession();
   const saved = localStorage.getItem("channeliq_handle");
   if (session) {
     state.user=session.user;
+    await loadGoals();
     if (saved) { state.handle=saved; state.screen="loading"; render(); await loadChannel(saved); }
     else { state.screen="onboard"; render(); }
   } else {
@@ -326,6 +503,7 @@ async function init() {
   sb.auth.onAuthStateChange(async (event, session) => {
     if (event==="SIGNED_IN" && session) {
       state.user=session.user;
+      await loadGoals();
       const h=localStorage.getItem("channeliq_handle");
       if (state.backgroundData && h) {
         state.channel=state.backgroundData.channel;
@@ -338,7 +516,8 @@ async function init() {
     }
     if (event==="SIGNED_OUT") {
       state.user=null; state.channel=null; state.videos=[];
-      state.comments=[]; state.sentiment=null; state.screen="onboard";
+      state.comments=[]; state.sentiment=null; state.goals=null;
+      state.screen="onboard";
       localStorage.removeItem("channeliq_handle"); render();
     }
   });
@@ -386,6 +565,7 @@ async function loadChannel(handle) {
     state.videos=vd.items||[];
     state.status=`${state.videos.length} videos loaded ✓`;
     state.screen="dashboard"; state.busy=false; render();
+    scheduleGoalPrompt();
   } catch(e) { state.error=e.message; state.screen="onboard"; render(); }
 }
 
@@ -398,10 +578,7 @@ async function fetchComments() {
     try {
       const r=await fetch(`${SERVER}/comments?videoId=${v.id}`);
       const d=await r.json();
-      d.items?.forEach(item=>{
-        const top=item.snippet.topLevelComment.snippet;
-        all.push({videoId:v.id,videoTitle:v.snippet.title,text:top.textDisplay,likes:top.likeCount,author:top.authorDisplayName});
-      });
+      d.items?.forEach(item=>{ const top=item.snippet.topLevelComment.snippet; all.push({videoId:v.id,videoTitle:v.snippet.title,text:top.textDisplay,likes:top.likeCount,author:top.authorDisplayName}); });
     } catch(_) {}
   }
   state.comments=all; state.status=`${all.length} comments loaded ✓`; state.busy=false; render();
@@ -415,7 +592,13 @@ async function runSentiment(data) {
   try {
     const r=await fetch(`${SERVER}/sentiment`,{
       method:"POST", headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({ comments:src, goal:state.goal||"", creatorType:state.creatorType||"" })
+      body:JSON.stringify({
+        comments:src,
+        goal: state.goals?.goal||"",
+        creatorType: state.goals?.content_type||"",
+        targetAudience: state.goals?.target_audience||"",
+        referenceVideoIds: state.goals?.reference_video_ids||[]
+      })
     });
     if (!r.ok) throw new Error(`Error ${r.status}`);
     state.sentiment=await r.json();
@@ -437,16 +620,13 @@ async function runVideoSentiment() {
     const r=await fetch(`${SERVER}/comments?videoId=${video.id}`);
     const d=await r.json();
     const comments=[];
-    d.items?.forEach(item=>{
-      const top=item.snippet.topLevelComment.snippet;
-      comments.push({videoId:video.id,videoTitle:video.snippet.title,text:top.textDisplay,likes:top.likeCount,author:top.authorDisplayName});
-    });
+    d.items?.forEach(item=>{ const top=item.snippet.topLevelComment.snippet; comments.push({videoId:video.id,videoTitle:video.snippet.title,text:top.textDisplay,likes:top.likeCount,author:top.authorDisplayName}); });
     state.videoComments=comments;
     if (!comments.length) { state.status="No comments found"; state.busy=false; render(); return; }
     state.status="Running AI analysis..."; render();
     const sr=await fetch(`${SERVER}/sentiment`,{
       method:"POST", headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({ comments, goal:state.goal||"", creatorType:state.creatorType||"" })
+      body:JSON.stringify({ comments, goal:state.goals?.goal||"", creatorType:state.goals?.content_type||"" })
     });
     if (sr.ok) { state.videoSentiment=await sr.json(); state.status="Analysis complete ✓"; }
   } catch(e) { state.status="Error: "+e.message; }
@@ -458,15 +638,46 @@ function setTab(t) { state.tab=t; render(); }
 function setDateRange(r) { state.dateRange=r; render(); }
 function toggleSpam() { state.spamVisible=!state.spamVisible; render(); }
 
+function filterVideosByRange(videos, range) {
+  if (range==="all") return videos;
+  const days=range==="7"?7:range==="30"?30:range==="90"?90:365;
+  const cutoff=new Date(Date.now()-days*24*60*60*1000);
+  return videos.filter(v=>new Date(v.snippet.publishedAt)>=cutoff);
+}
+
+function durationSecs(iso="") {
+  const m=iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if(!m) return 0;
+  return (+(m[1]||0))*3600+(+(m[2]||0))*60+(+(m[3]||0));
+}
+
+function calcAdvanced(videos) {
+  if (!videos.length) return null;
+  const totalViews=videos.reduce((s,v)=>s+parseInt(v.statistics?.viewCount||0),0);
+  const totalLikes=videos.reduce((s,v)=>s+parseInt(v.statistics?.likeCount||0),0);
+  const totalComments=videos.reduce((s,v)=>s+parseInt(v.statistics?.commentCount||0),0);
+  const avgViews=Math.round(totalViews/videos.length);
+  const avgEngRate=totalViews?((totalLikes+totalComments)/totalViews*100).toFixed(2):"0.00";
+  const topVideo=[...videos].sort((a,b)=>parseInt(b.statistics?.viewCount||0)-parseInt(a.statistics?.viewCount||0))[0];
+  const dayBuckets={Mon:0,Tue:0,Wed:0,Thu:0,Fri:0,Sat:0,Sun:0};
+  const dayCounts={Mon:0,Tue:0,Wed:0,Thu:0,Fri:0,Sat:0,Sun:0};
+  const dayNames=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  videos.forEach(v=>{ const day=dayNames[new Date(v.snippet.publishedAt).getDay()]; dayBuckets[day]=(dayBuckets[day]||0)+parseInt(v.statistics?.viewCount||0); dayCounts[day]=(dayCounts[day]||0)+1; });
+  const dayAvgs=Object.entries(dayBuckets).map(([day,total])=>({day,avg:dayCounts[day]?Math.round(total/dayCounts[day]):0,count:dayCounts[day]})).sort((a,b)=>["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].indexOf(a.day)-["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].indexOf(b.day));
+  const bestDay=[...dayAvgs].sort((a,b)=>b.avg-a.avg)[0];
+  const lengthBuckets=[{label:"0–5 min",min:0,max:300},{label:"5–10 min",min:300,max:600},{label:"10–20 min",min:600,max:1200},{label:"20–60 min",min:1200,max:3600},{label:"60 min+",min:3600,max:Infinity}];
+  const lengthData=lengthBuckets.map(b=>{ const matching=videos.filter(v=>{ const s=durationSecs(v.contentDetails?.duration); return s>=b.min&&s<b.max; }); const totalV=matching.reduce((s,v)=>s+parseInt(v.statistics?.viewCount||0),0); const avgV=matching.length?Math.round(totalV/matching.length):0; const avgEng=matching.length?((matching.reduce((s,v)=>s+parseInt(v.statistics?.likeCount||0)+parseInt(v.statistics?.commentCount||0),0)/Math.max(totalV,1))*100).toFixed(1):"0.0"; return {...b,count:matching.length,avgViews:avgV,avgEng}; }).filter(b=>b.count>0);
+  const top5=[...videos].sort((a,b)=>parseInt(b.statistics?.viewCount||0)-parseInt(a.statistics?.viewCount||0)).slice(0,5).map(v=>({title:cleanTitle(v.snippet.title),views:parseInt(v.statistics?.viewCount||0)}));
+  const sorted=[...videos].sort((a,b)=>new Date(a.snippet.publishedAt)-new Date(b.snippet.publishedAt));
+  const half=Math.floor(sorted.length/2);
+  const calcAvgEng=arr=>{ const v=arr.reduce((s,x)=>s+parseInt(x.statistics?.viewCount||0),0); const e=arr.reduce((s,x)=>s+parseInt(x.statistics?.likeCount||0)+parseInt(x.statistics?.commentCount||0),0); return v?(e/v*100).toFixed(2):"0.00"; };
+  const engTrend=half>0?{before:calcAvgEng(sorted.slice(0,half)),after:calcAvgEng(sorted.slice(half)),direction:parseFloat(calcAvgEng(sorted.slice(half)))>=parseFloat(calcAvgEng(sorted.slice(0,half)))?"up":"down"}:null;
+  return {totalViews,totalLikes,totalComments,avgViews,avgEngRate,topVideo,dayAvgs,bestDay,lengthData,top5,engTrend};
+}
+
 function emojiBlock(emojiStats) {
   if (!emojiStats||!emojiStats.total) return "";
-  return `<div class="card">
-    <div class="card-title">😄 Emoji reactions — ${emojiStats.total.toLocaleString()} total</div>
-    <div class="emoji-grid">
-      ${emojiStats.top.map(e=>`<div class="emoji-item"><div class="emoji-char">${e.emoji}</div><div class="emoji-count">${e.count.toLocaleString()}</div><div class="emoji-lbl">uses</div></div>`).join("")}
-      ${emojiStats.otherCount>0?`<div class="emoji-item"><div class="emoji-char" style="font-size:14px;padding-top:6px">+more</div><div class="emoji-count">${emojiStats.otherCount.toLocaleString()}</div><div class="emoji-lbl">other</div></div>`:""}
-    </div>
-  </div>`;
+  return `<div class="card"><div class="card-title">😄 Emoji reactions — ${emojiStats.total.toLocaleString()} total</div><div class="emoji-grid">${emojiStats.top.map(e=>`<div class="emoji-item"><div class="emoji-char">${e.emoji}</div><div class="emoji-count">${e.count.toLocaleString()}</div><div class="emoji-lbl">uses</div></div>`).join("")}${emojiStats.otherCount>0?`<div class="emoji-item"><div class="emoji-char" style="font-size:14px;padding-top:6px">+more</div><div class="emoji-count">${emojiStats.otherCount.toLocaleString()}</div><div class="emoji-lbl">other</div></div>`:""}</div></div>`;
 }
 
 function sentimentBlock(s) {
@@ -485,108 +696,24 @@ function sentimentBlock(s) {
 
 function renderAdvanced(filteredVideos, adv) {
   if (!adv) return `<div class="empty"><div class="empty-icon">📊</div><div class="empty-title">Not enough data</div><div class="empty-text">Add more videos to unlock trend analysis.</div></div>`;
-
-  const maxDayAvg = Math.max(...adv.dayAvgs.map(d=>d.avg),1);
-  const maxTop5Views = Math.max(...adv.top5.map(v=>v.views),1);
-
+  const maxDayAvg=Math.max(...adv.dayAvgs.map(d=>d.avg),1);
+  const maxTop5Views=Math.max(...adv.top5.map(v=>v.views),1);
   return `
-    <!-- DATE RANGE -->
-    <div class="card">
-      <div class="card-title">Date range</div>
-      <div class="date-range-pills">
-        ${[{l:"7 days",v:"7"},{l:"30 days",v:"30"},{l:"90 days",v:"90"},{l:"1 year",v:"365"},{l:"All time",v:"all"}].map(r=>`
-          <button class="date-pill ${state.dateRange===r.v?"active":""}" onclick="setDateRange('${r.v}')">${r.l}</button>`).join("")}
-      </div>
+    <div class="card"><div class="card-title">Date range</div>
+      <div class="date-range-pills">${[{l:"7 days",v:"7"},{l:"30 days",v:"30"},{l:"90 days",v:"90"},{l:"1 year",v:"365"},{l:"All time",v:"all"}].map(r=>`<button class="date-pill ${state.dateRange===r.v?"active":""}" onclick="setDateRange('${r.v}')">${r.l}</button>`).join("")}</div>
       <div style="font-size:12px;color:#64748b">${filteredVideos.length} video${filteredVideos.length!==1?"s":""} in this period · ${adv.totalViews.toLocaleString()} total views</div>
     </div>
-
-    <!-- PERFORMANCE SUMMARY -->
-    <div class="card">
-      <div class="adv-section-title">Performance summary</div>
-      ${[
-        {label:"Average views per video", value:adv.avgViews.toLocaleString()},
-        {label:"Average engagement rate", value:adv.avgEngRate+"%"},
-        {label:"Total likes", value:adv.totalLikes.toLocaleString()},
-        {label:"Total comments", value:adv.totalComments.toLocaleString()},
-        {label:"Best performing video", value:cleanTitle(adv.topVideo?.snippet?.title||"").slice(0,30)+"…"},
-      ].map(r=>`<div class="metric-row"><span class="metric-label">${r.label}</span><span class="metric-value">${r.value}</span></div>`).join("")}
-      ${adv.engTrend?`
-      <div style="margin-top:12px;padding-top:12px;border-top:1px solid #f1f5f9">
-        <div style="font-size:11px;color:#64748b;margin-bottom:6px">Engagement trend — first half vs second half of period</div>
-        <div style="display:flex;gap:12px">
-          <div style="flex:1;background:#f8fafc;border-radius:10px;padding:10px;text-align:center">
-            <div style="font-size:18px;font-weight:800;color:#94a3b8;font-family:monospace">${adv.engTrend.before}%</div>
-            <div style="font-size:10px;color:#94a3b8;margin-top:2px">Earlier videos</div>
-          </div>
-          <div style="display:flex;align-items:center;font-size:18px">${adv.engTrend.direction==="up"?"→":"→"}</div>
-          <div style="flex:1;background:#f8fafc;border-radius:10px;padding:10px;text-align:center">
-            <div style="font-size:18px;font-weight:800;color:${adv.engTrend.direction==="up"?"#10b981":"#ef4444"};font-family:monospace">${adv.engTrend.after}%</div>
-            <div style="font-size:10px;color:#94a3b8;margin-top:2px">Recent videos ${adv.engTrend.direction==="up"?"↑":"↓"}</div>
-          </div>
-        </div>
-      </div>`:""}
+    <div class="card"><div class="adv-section-title">Performance summary</div>
+      ${[{label:"Average views per video",value:adv.avgViews.toLocaleString()},{label:"Average engagement rate",value:adv.avgEngRate+"%"},{label:"Total likes",value:adv.totalLikes.toLocaleString()},{label:"Total comments",value:adv.totalComments.toLocaleString()},{label:"Best performing video",value:cleanTitle(adv.topVideo?.snippet?.title||"").slice(0,30)+"…"}].map(r=>`<div class="metric-row"><span class="metric-label">${r.label}</span><span class="metric-value">${r.value}</span></div>`).join("")}
+      ${adv.engTrend?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid #f1f5f9"><div style="font-size:11px;color:#64748b;margin-bottom:8px">Engagement trend — earlier vs recent videos</div><div style="display:flex;gap:10px"><div style="flex:1;background:#f8fafc;border-radius:10px;padding:10px;text-align:center"><div style="font-size:18px;font-weight:800;color:#94a3b8;font-family:monospace">${adv.engTrend.before}%</div><div style="font-size:10px;color:#94a3b8;margin-top:2px">Earlier</div></div><div style="display:flex;align-items:center;font-size:16px;color:#64748b">→</div><div style="flex:1;background:#f8fafc;border-radius:10px;padding:10px;text-align:center"><div style="font-size:18px;font-weight:800;color:${adv.engTrend.direction==="up"?"#10b981":"#ef4444"};font-family:monospace">${adv.engTrend.after}%</div><div style="font-size:10px;color:#94a3b8;margin-top:2px">Recent ${adv.engTrend.direction==="up"?"↑":"↓"}</div></div></div></div>`:""}
     </div>
-
-    <!-- TOP 5 VIDEOS -->
-    <div class="card">
-      <div class="adv-section-title">Top videos by views</div>
-      ${adv.top5.map((v,i)=>`
-        <div class="horiz-bar-row">
-          <div style="min-width:20px;font-size:11px;font-weight:700;color:#94a3b8">#${i+1}</div>
-          <div class="horiz-bar-label">${v.title.slice(0,22)}</div>
-          <div class="horiz-bar-track">
-            <div class="horiz-bar-fill" style="width:${Math.round((v.views/maxTop5Views)*100)}%;background:${i===0?"#3b82f6":"#bfdbfe"}"></div>
-          </div>
-          <div class="horiz-bar-val">${fmt(v.views)}</div>
-        </div>`).join("")}
-    </div>
-
-    <!-- BEST DAY TO POST -->
-    <div class="card">
-      <div class="adv-section-title">Best day to publish</div>
-      <div style="font-size:12px;color:#64748b;margin-bottom:12px">Average views per video by publish day${adv.bestDay?` — <strong style="color:#0f172a">${adv.bestDay.day}</strong> is your strongest day`:""}.</div>
-      <div class="day-grid">
-        ${adv.dayAvgs.map(d=>{
-          const intensity = maxDayAvg>0?Math.round((d.avg/maxDayAvg)*100):0;
-          const bg = d.day===adv.bestDay?.day?"#0f172a":intensity>60?"#dbeafe":intensity>30?"#eff6ff":"#f8fafc";
-          const col = d.day===adv.bestDay?.day?"#f1f5f9":intensity>60?"#1e40af":"#64748b";
-          return`<div class="day-cell" style="background:${bg}">
-            <div class="day-name" style="color:${d.day===adv.bestDay?.day?"#94a3b8":"#94a3b8"}">${d.day}</div>
-            <div class="day-val" style="color:${col}">${d.count>0?fmt(d.avg):"–"}</div>
-            ${d.count>0?`<div style="font-size:8px;color:${d.day===adv.bestDay?.day?"#64748b":"#94a3b8"};margin-top:1px">${d.count}v</div>`:""}
-          </div>`;
-        }).join("")}
+    <div class="card"><div class="adv-section-title">Top videos by views</div>${adv.top5.map((v,i)=>`<div class="horiz-bar-row"><div style="min-width:20px;font-size:11px;font-weight:700;color:#94a3b8">#${i+1}</div><div class="horiz-bar-label">${v.title.slice(0,22)}</div><div class="horiz-bar-track"><div class="horiz-bar-fill" style="width:${Math.round((v.views/maxTop5Views)*100)}%;background:${i===0?"#3b82f6":"#bfdbfe"}"></div></div><div class="horiz-bar-val">${fmt(v.views)}</div></div>`).join("")}</div>
+    <div class="card"><div class="adv-section-title">Best day to publish</div><div style="font-size:12px;color:#64748b;margin-bottom:12px">${adv.bestDay?`<strong style="color:#0f172a">${adv.bestDay.day}</strong> is your strongest day based on average views.`:""}</div>
+      <div class="day-grid">${adv.dayAvgs.map(d=>{ const intensity=maxDayAvg>0?Math.round((d.avg/maxDayAvg)*100):0; const bg=d.day===adv.bestDay?.day?"#0f172a":intensity>60?"#dbeafe":intensity>30?"#eff6ff":"#f8fafc"; const col=d.day===adv.bestDay?.day?"#f1f5f9":intensity>60?"#1e40af":"#64748b"; return`<div class="day-cell" style="background:${bg}"><div class="day-name">${d.day}</div><div class="day-val" style="color:${col}">${d.count>0?fmt(d.avg):"–"}</div>${d.count>0?`<div style="font-size:8px;color:${d.day===adv.bestDay?.day?"#64748b":"#94a3b8"};margin-top:1px">${d.count}v</div>`:""}</div>`; }).join("")}
       </div>
     </div>
-
-    <!-- VIDEO LENGTH ANALYSIS -->
-    ${adv.lengthData.length>1?`
-    <div class="card">
-      <div class="adv-section-title">Performance by video length</div>
-      ${adv.lengthData.map(b=>`
-        <div class="length-bucket">
-          <div>
-            <div class="length-label">${b.label}</div>
-            <div class="length-count">${b.count} video${b.count!==1?"s":""}</div>
-          </div>
-          <div style="text-align:right">
-            <div class="length-avg">${fmt(b.avgViews)} avg views</div>
-            <div style="font-size:10px;color:#64748b">${b.avgEng}% engagement</div>
-          </div>
-        </div>`).join("")}
-    </div>`:""}
-
-    <!-- CONNECT FOR DEEPER INSIGHTS -->
-    <div class="connect-cta">
-      <div style="font-size:22px;margin-bottom:10px">🔐</div>
-      <div class="connect-cta-title">Unlock Studio Analytics</div>
-      <div class="connect-cta-sub">Connect your YouTube Studio account to unlock private metrics not available in public data.</div>
-      <div class="connect-cta-features">
-        ${["Average view duration per video","Audience retention curves (25%, 50%, 75%, 100%)","Impressions and click-through rate from YouTube","Traffic source breakdown (Search vs Suggested vs Browse)","Subscribers gained and lost per video","Revenue and CPM by geography (monetised channels)"].map(f=>`<div class="connect-cta-feature"><span style="color:#3b82f6">→</span> ${f}</div>`).join("")}
-      </div>
-      <button class="btn" onclick="signInWithGoogle()" style="width:100%;background:#3b82f6">Connect YouTube Studio →</button>
-      <div style="font-size:11px;color:#475569;margin-top:8px;text-align:center">Read-only access · No changes made to your channel</div>
-    </div>`;
+    ${adv.lengthData.length>1?`<div class="card"><div class="adv-section-title">Performance by video length</div>${adv.lengthData.map(b=>`<div class="length-bucket"><div><div class="length-label">${b.label}</div><div class="length-count">${b.count} video${b.count!==1?"s":""}</div></div><div style="text-align:right"><div class="length-avg">${fmt(b.avgViews)} avg views</div><div style="font-size:10px;color:#64748b">${b.avgEng}% engagement</div></div></div>`).join("")}</div>`:""}
+    <div class="connect-cta"><div style="font-size:22px;margin-bottom:10px">🔐</div><div style="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:6px">Unlock Studio Analytics</div><div style="font-size:12px;color:#64748b;line-height:1.6;margin-bottom:14px">Connect your YouTube Studio account to unlock private metrics.</div>${["Average view duration per video","Audience retention curves","Impressions and CTR","Traffic source breakdown","Subscribers gained/lost per video","Revenue and CPM data"].map(f=>`<div class="connect-cta-feature"><span style="color:#3b82f6">→</span> ${f}</div>`).join("")}<button class="btn" onclick="signInWithGoogle()" style="width:100%;margin-top:14px">Connect YouTube Studio →</button></div>`;
 }
 
 function renderOnboard() {
@@ -615,110 +742,57 @@ function renderOnboard() {
 }
 
 function renderTeaser() {
-  const ch=state.channel, snip=ch.snippet||{}, st=ch.statistics||{};
-  const subs=parseInt(st.subscriberCount||0), views=parseInt(st.viewCount||0);
-  const fakeKpis=[
-    {label:"Subscribers",value:fmt(subs),color:"#3b82f6",icon:"👥",blur:false},
-    {label:"Total Views",value:fmt(views),color:"#10b981",icon:"👁",blur:false},
-    {label:"Engagement Rate",value:"4.8%",color:"#06b6d4",icon:"📊",blur:true},
-    {label:"Sub Conv. Rate",value:"0.42%",color:"#8b5cf6",icon:"🔄",blur:true},
-    {label:"Avg View Duration",value:"5m 12s",color:"#f59e0b",icon:"⏱",blur:true},
-    {label:"Top Traffic Source",value:"Search 61%",color:"#ef4444",icon:"🔍",blur:true},
-  ];
+  const ch=state.channel,snip=ch.snippet||{},st=ch.statistics||{};
+  const subs=parseInt(st.subscriberCount||0),views=parseInt(st.viewCount||0);
+  const fakeKpis=[{label:"Subscribers",value:fmt(subs),color:"#3b82f6",icon:"👥",blur:false},{label:"Total Views",value:fmt(views),color:"#10b981",icon:"👁",blur:false},{label:"Engagement Rate",value:"4.8%",color:"#06b6d4",icon:"📊",blur:true},{label:"Sub Conv. Rate",value:"0.42%",color:"#8b5cf6",icon:"🔄",blur:true},{label:"Avg View Duration",value:"5m 12s",color:"#f59e0b",icon:"⏱",blur:true},{label:"Top Traffic Source",value:"Search 61%",color:"#ef4444",icon:"🔍",blur:true}];
   document.getElementById("app").innerHTML=`
     <div class="teaser">
-      <div class="teaser-topbar">
-        <div style="display:flex;align-items:center;gap:8px"><div class="logo-box">YT</div><span style="color:#f1f5f9;font-weight:700;font-size:14px">ChannelIQ</span></div>
-        <button class="signout-btn" onclick="state.screen='onboard';render()">← Change channel</button>
-      </div>
+      <div class="teaser-topbar"><div style="display:flex;align-items:center;gap:8px"><div class="logo-box">YT</div><span style="color:#f1f5f9;font-weight:700;font-size:14px">ChannelIQ</span></div><button class="signout-btn" onclick="state.screen='onboard';render()">← Change channel</button></div>
       <div class="teaser-body">
-        <div class="teaser-channel">
-          ${snip.thumbnails?.default?.url?`<img class="teaser-avatar" src="${snip.thumbnails.default.url}"/>`:`<div class="teaser-avatar" style="display:flex;align-items:center;justify-content:center;font-size:20px">📺</div>`}
-          <div><div class="teaser-name">${snip.title||"Your Channel"}</div><div class="teaser-handle">@${snip.customUrl?.replace("@","")||""} · ${getTierLabel(state.tier)} tier</div></div>
-        </div>
+        <div class="teaser-channel">${snip.thumbnails?.default?.url?`<img class="teaser-avatar" src="${snip.thumbnails.default.url}"/>`:`<div class="teaser-avatar" style="display:flex;align-items:center;justify-content:center;font-size:20px">📺</div>`}<div><div class="teaser-name">${snip.title||"Your Channel"}</div><div class="teaser-handle">@${snip.customUrl?.replace("@","")||""} · ${getTierLabel(state.tier)} tier</div></div></div>
         <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#64748b;margin-bottom:8px">Your KPIs — sign in to unlock all</div>
-        <div class="teaser-kpi-grid">
-          ${fakeKpis.map(k=>`<div class="teaser-kpi" style="border-left-color:${k.color}"><div class="teaser-kpi-label">${k.icon} ${k.label}</div><div class="teaser-kpi-value ${k.blur?"blurred":""}" style="color:${k.color}">${k.value}</div></div>`).join("")}
+        <div class="teaser-kpi-grid">${fakeKpis.map(k=>`<div class="teaser-kpi" style="border-left-color:${k.color}"><div class="teaser-kpi-label">${k.icon} ${k.label}</div><div class="teaser-kpi-value ${k.blur?"blurred":""}" style="color:${k.color}">${k.value}</div></div>`).join("")}</div>
+        <div class="unlock-banner"><div style="font-size:28px;margin-bottom:8px">🔓</div><div class="unlock-title">Your insights are ready</div><div class="unlock-sub">Sign in with Google to unlock your full dashboard — free for ${getTierLabel(state.tier)} channels.</div>
+          <button class="google-btn" onclick="signInWithGoogle()"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>Continue with Google</button>
         </div>
-        <div class="unlock-banner">
-          <div style="font-size:28px;margin-bottom:8px">🔓</div>
-          <div class="unlock-title">Your insights are ready</div>
-          <div class="unlock-sub">Sign in with Google to unlock your full dashboard — free for ${getTierLabel(state.tier)} channels.</div>
-          <button class="google-btn" onclick="signInWithGoogle()">
-            <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-            Continue with Google
-          </button>
-        </div>
-        <div class="teaser-preview" style="min-height:160px">
-          <div class="teaser-preview-label">🤖 AI Sentiment Analysis</div>
-          <div class="blurred" style="color:#cbd5e1;font-size:13px;line-height:1.8">Your audience responds most positively to your tutorial content and production quality. Comment themes show strong demand for more in-depth guides.</div>
-          <div class="teaser-preview-overlay"><div class="teaser-preview-lock">🔒 Sign in to see your real sentiment analysis</div></div>
-        </div>
-        <div class="teaser-preview" style="min-height:120px">
-          <div class="teaser-preview-label">📈 Growth Recommendations</div>
-          <div class="blurred" style="color:#cbd5e1;font-size:13px;line-height:1.8">Post on Tuesday and Thursday between 6-8pm GMT to maximise your audience reach. Increasing to 2 videos per week could accelerate subscriber growth by an estimated 40%.</div>
-          <div class="teaser-preview-overlay"><div class="teaser-preview-lock">🔒 Sign in to unlock your growth plan</div></div>
-        </div>
+        <div class="teaser-preview" style="min-height:160px"><div class="teaser-preview-label">🤖 AI Sentiment Analysis</div><div class="blurred" style="color:#cbd5e1;font-size:13px;line-height:1.8">Your audience responds most positively to your tutorial content and production quality. Comment themes show strong demand for more in-depth guides.</div><div class="teaser-preview-overlay"><div class="teaser-preview-lock">🔒 Sign in to see your real sentiment analysis</div></div></div>
+        <div class="teaser-preview" style="min-height:120px"><div class="teaser-preview-label">📈 Growth Recommendations</div><div class="blurred" style="color:#cbd5e1;font-size:13px;line-height:1.8">Post on Tuesday and Thursday between 6-8pm GMT to maximise your audience reach. Increasing to 2 videos per week could accelerate subscriber growth by an estimated 40%.</div><div class="teaser-preview-overlay"><div class="teaser-preview-lock">🔒 Sign in to unlock your growth plan</div></div></div>
       </div>
     </div>`;
 }
 
 function renderVideoDetail() {
-  const v=state.selectedVideo;
-  if (!v) return;
-  const views=parseInt(v.statistics?.viewCount||0);
-  const likes=parseInt(v.statistics?.likeCount||0);
-  const comms=parseInt(v.statistics?.commentCount||0);
+  const v=state.selectedVideo; if(!v) return;
+  const views=parseInt(v.statistics?.viewCount||0),likes=parseInt(v.statistics?.likeCount||0),comms=parseInt(v.statistics?.commentCount||0);
   const eng=views?((likes+comms)/views*100).toFixed(1):"0.0";
   const ec=parseFloat(eng)>5?"#10b981":parseFloat(eng)>2?"#f59e0b":"#94a3b8";
   const thumb=v.snippet.thumbnails?.maxres?.url||v.snippet.thumbnails?.high?.url||v.snippet.thumbnails?.medium?.url||v.snippet.thumbnails?.default?.url||"";
   document.getElementById("app").innerHTML=`
     <div style="min-height:100vh;background:#f1f5f9">
-      <div class="topbar">
-        <div class="logo"><div class="logo-box">YT</div><span class="logo-text">ChannelIQ</span></div>
-        <div style="display:flex;align-items:center;gap:8px">
-          ${state.status?`<span class="status-pill">${state.status}</span>`:""}
-          <button class="signout-btn" onclick="signOut()">Sign out</button>
-        </div>
-      </div>
+      <div class="topbar"><div class="logo"><div class="logo-box">YT</div><span class="logo-text">ChannelIQ</span></div><div style="display:flex;align-items:center;gap:8px">${state.status?`<span class="status-pill">${state.status}</span>`:""}<button class="signout-btn" onclick="signOut()">Sign out</button></div></div>
       <div class="body">
-        <div class="video-detail-header">
-          <button class="back-btn" onclick="closeVideo()">← Back</button>
-          <div style="font-size:13px;font-weight:700;color:#0f172a;line-height:1.3">${cleanTitle(v.snippet.title)}</div>
-        </div>
+        <div class="video-detail-header"><button class="back-btn" onclick="closeVideo()">← Back</button><div style="font-size:13px;font-weight:700;color:#0f172a;line-height:1.3">${cleanTitle(v.snippet.title)}</div></div>
         ${thumb?`<img src="${thumb}" style="width:100%;border-radius:14px;margin-bottom:12px;object-fit:cover;max-height:200px;display:block" onerror="this.style.display='none'"/>`:""}
         <div style="font-size:10px;color:#94a3b8;margin-bottom:12px">${fmtDate(v.snippet.publishedAt)} · ${fmtDur(v.contentDetails?.duration)}</div>
-        <div class="stat-grid" style="margin-bottom:16px">
-          <div class="stat-box"><div class="stat-val" style="color:#3b82f6">${fmt(views)}</div><div class="stat-lbl">Views</div></div>
-          <div class="stat-box"><div class="stat-val" style="color:#10b981">${fmt(likes)}</div><div class="stat-lbl">Likes</div></div>
-          <div class="stat-box"><div class="stat-val" style="color:#f59e0b">${fmt(comms)}</div><div class="stat-lbl">Comments</div></div>
-          <div class="stat-box"><div class="stat-val" style="color:${ec}">${eng}%</div><div class="stat-lbl">Engagement</div></div>
-        </div>
-        ${state.busy?`<div style="text-align:center;padding:40px 20px"><div style="font-size:28px;margin-bottom:10px">🤖</div><div style="font-size:14px;font-weight:600;color:#0f172a;margin-bottom:6px">${state.status}</div></div>`:`
-          ${!state.videoSentiment?`
-            <div class="dark-card" style="text-align:center;padding:28px 20px">
-              <div style="font-size:28px;margin-bottom:10px">🤖</div>
-              <div style="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:6px">Run AI Sentiment Analysis</div>
-              <div style="font-size:12px;color:#64748b;margin-bottom:18px;line-height:1.6">Analyse comments on this video — themes, audience personality, strengths and quick wins.</div>
-              <button class="btn" onclick="runVideoSentiment()">Run analysis →</button>
-            </div>`:sentimentBlock(state.videoSentiment)}
-        `}
+        <div class="stat-grid" style="margin-bottom:16px"><div class="stat-box"><div class="stat-val" style="color:#3b82f6">${fmt(views)}</div><div class="stat-lbl">Views</div></div><div class="stat-box"><div class="stat-val" style="color:#10b981">${fmt(likes)}</div><div class="stat-lbl">Likes</div></div><div class="stat-box"><div class="stat-val" style="color:#f59e0b">${fmt(comms)}</div><div class="stat-lbl">Comments</div></div><div class="stat-box"><div class="stat-val" style="color:${ec}">${eng}%</div><div class="stat-lbl">Engagement</div></div></div>
+        ${state.busy?`<div style="text-align:center;padding:40px 20px"><div style="font-size:28px;margin-bottom:10px">🤖</div><div style="font-size:14px;font-weight:600;color:#0f172a;margin-bottom:6px">${state.status}</div></div>`:`${!state.videoSentiment?`<div class="dark-card" style="text-align:center;padding:28px 20px"><div style="font-size:28px;margin-bottom:10px">🤖</div><div style="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:6px">Run AI Sentiment Analysis</div><div style="font-size:12px;color:#64748b;margin-bottom:18px;line-height:1.6">Analyse comments on this video — themes, audience personality, strengths and quick wins.</div><button class="btn" onclick="runVideoSentiment()">Run analysis →</button></div>`:sentimentBlock(state.videoSentiment)}`}
       </div>
     </div>`;
 }
 
 function renderDashboard() {
   const {channel,videos,comments,sentiment,tab,status,busy,tier,dateRange}=state;
-  const st=channel.statistics||{}, snip=channel.snippet||{};
-  const subs=parseInt(st.subscriberCount||0), totViews=parseInt(st.viewCount||0), vidCount=parseInt(st.videoCount||0);
+  const st=channel.statistics||{},snip=channel.snippet||{};
+  const subs=parseInt(st.subscriberCount||0),totViews=parseInt(st.viewCount||0),vidCount=parseInt(st.videoCount||0);
   const totLikes=videos.reduce((s,v)=>s+parseInt(v.statistics?.likeCount||0),0);
   const totComms=videos.reduce((s,v)=>s+parseInt(v.statistics?.commentCount||0),0);
   const vidViews=videos.reduce((s,v)=>s+parseInt(v.statistics?.viewCount||0),0);
   const engRate=vidViews?((totLikes+totComms)/vidViews*100).toFixed(2):"0.00";
   const topVideo=[...videos].sort((a,b)=>parseInt(b.statistics?.viewCount||0)-parseInt(a.statistics?.viewCount||0))[0];
   const maxViews=Math.max(...videos.map(v=>parseInt(v.statistics?.viewCount||0)),1);
-  const filteredVideos=filterVideosByRange(videos, dateRange);
+  const filteredVideos=filterVideosByRange(videos,dateRange);
   const adv=calcAdvanced(filteredVideos);
+  const goals=state.goals;
 
   const kpis=[
     {label:"Subscribers",value:fmt(subs),color:"#3b82f6",icon:"👥",note:subs<1000?"Consistency and SEO titles are the fastest path to 1,000.":"Solid base. Focus on converting views to subscribers."},
@@ -732,21 +806,44 @@ function renderDashboard() {
   const sortedVideos=[...videos].sort((a,b)=>parseInt(b.statistics?.viewCount||0)-parseInt(a.statistics?.viewCount||0));
   const lockedOverlay=(required,feature)=>`<div class="locked-overlay"><div style="font-size:22px">🔒</div><div class="locked-text">${feature}</div><div class="locked-sub">Available on ${required.charAt(0).toUpperCase()+required.slice(1)} tier</div><button class="upgrade-btn">Upgrade to unlock</button></div>`;
 
+  // Goal context banner
+  const goalBanner = goals?.goal ? `
+    <div class="card" style="border-left:4px solid #3b82f6;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#3b82f6;margin-bottom:8px">🎯 Your personalised goals</div>
+        <button onclick="openGoalFlow()" style="background:none;border:none;font-size:11px;color:#64748b;cursor:pointer;font-family:inherit;padding:0">Edit →</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        ${goals.goal?`<div style="display:flex;gap:8px;align-items:center"><span style="font-size:11px;color:#94a3b8;min-width:60px">Goal</span><span style="font-size:12px;font-weight:600;color:#0f172a">${goalLabel(goals.goal)}</span></div>`:""}
+        ${goals.content_type?`<div style="display:flex;gap:8px;align-items:center"><span style="font-size:11px;color:#94a3b8;min-width:60px">Content</span><span style="font-size:12px;font-weight:600;color:#0f172a">${contentLabel(goals.content_type)}</span></div>`:""}
+        ${goals.target_audience?`<div style="display:flex;gap:8px;align-items:center"><span style="font-size:11px;color:#94a3b8;min-width:60px">Audience</span><span style="font-size:12px;font-weight:600;color:#0f172a">${audienceLabel(goals.target_audience)}</span></div>`:""}
+        ${goals.reference_video_titles?.length?`<div style="display:flex;gap:8px;align-items:flex-start"><span style="font-size:11px;color:#94a3b8;min-width:60px;margin-top:1px">Focus</span><span style="font-size:12px;font-weight:600;color:#0f172a">${goals.reference_video_titles.join(", ")}</span></div>`:""}
+      </div>
+    </div>` : "";
+
   const tabContent={
     overview:`
+      ${goalBanner}
       <div class="card"><div class="card-title">Views per video</div><div class="bar-chart">${[...videos].sort((a,b)=>new Date(a.snippet.publishedAt)-new Date(b.snippet.publishedAt)).map((v,i,arr)=>{ const views=parseInt(v.statistics?.viewCount||0); const h=Math.max((views/maxViews)*100,2); return`<div class="bar-wrap"><div style="flex:1;display:flex;align-items:flex-end;width:100%"><div class="bar" style="height:${h}%;background:${i===arr.length-1?"#3b82f6":"#bfdbfe"}"></div></div><div class="bar-lbl">${cleanTitle(v.snippet.title).slice(0,10)}</div></div>`; }).join("")}</div></div>
-      <div class="dark-card"><div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#3b82f6;margin-bottom:10px">📋 What your data is telling you</div>${[{t:"Foundation phase",b:`${vidCount} videos is the beginning. Every video trains the algorithm.`},{t:"Engagement beats views",b:"50 views and 10 comments beats 500 views and silence."},{t:"Your blueprint",b:topVideo?`"${cleanTitle(topVideo.snippet.title)}" is your top performer. Study and repeat that formula.`:"Keep publishing — patterns will emerge."},{t:"Run sentiment",b:"Tap 'Fetch comments' to get AI analysis of what your audience loves."}].map(item=>`<div class="insight"><div class="insight-title">${item.t}</div><div class="insight-body">${item.b}</div></div>`).join("")}</div>
+      <div class="dark-card"><div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#3b82f6;margin-bottom:10px">📋 ${goals?.goal?"Goal-aligned insights":"What your data is telling you"}</div>
+        ${[
+          {t:goals?.goal?"Working towards your goal":"Foundation phase",b:goals?.goal?`You're focused on ${goalLabel(goals.goal).toLowerCase()}. ${topVideo?`Your top video "${cleanTitle(topVideo.snippet.title)}" is your strongest signal — analyse what made it work.`:""}`:`${vidCount} videos is the beginning. Every video trains the algorithm.`},
+          {t:"Engagement beats views",b:"50 views and 10 comments beats 500 views and silence."},
+          {t:goals?.contentType?"Content type benchmark":"Your blueprint",b:goals?.contentType?`${contentLabel(goals.contentType)} creators typically see strongest growth from consistent uploads and strong thumbnails.`:topVideo?`"${cleanTitle(topVideo.snippet.title)}" is your top performer. Study and repeat that formula.`:"Keep publishing — patterns will emerge."},
+          {t:"Run sentiment",b:goals?.goal?`AI analysis will surface what your audience says specifically about the type of content aligned to your goal: ${goalLabel(goals.goal).toLowerCase()}.`:"Tap 'Fetch comments' to get AI analysis of what your audience loves."},
+        ].map(item=>`<div class="insight"><div class="insight-title">${item.t}</div><div class="insight-body">${item.b}</div></div>`).join("")}
+      </div>
       ${isLocked("silver")?`<div class="locked-card" style="height:100px"><div class="card-title">Posting time vs audience insights</div>${lockedOverlay("silver","Posting Time Analysis")}</div>`:""}`,
 
     videos:`
       <div class="card" style="margin-bottom:12px"><div style="font-size:13px;font-weight:700;margin-bottom:4px">Your videos</div><div style="font-size:11px;color:#64748b">Tap any video for a full breakdown and AI sentiment analysis</div></div>
-      ${sortedVideos.map(v=>{ const views=parseInt(v.statistics?.viewCount||0); const likes=parseInt(v.statistics?.likeCount||0); const comms=parseInt(v.statistics?.commentCount||0); const eng=views?((likes+comms)/views*100).toFixed(1):"0.0"; const ec=parseFloat(eng)>5?"#10b981":parseFloat(eng)>2?"#f59e0b":"#94a3b8"; const thumb=v.snippet.thumbnails?.maxres?.url||v.snippet.thumbnails?.high?.url||v.snippet.thumbnails?.medium?.url||v.snippet.thumbnails?.default?.url||""; const safeV=encodeURIComponent(JSON.stringify(v)); return`<div class="video-card" onclick="openVideo(JSON.parse(decodeURIComponent('${safeV}')))">${thumb?`<img src="${thumb}" class="video-thumb-large" onerror="this.style.display='none'"/>`:""}<div class="video-card-body"><div class="video-card-title">${cleanTitle(v.snippet.title)}</div><div class="video-card-meta">${fmtDate(v.snippet.publishedAt)} · ${fmtDur(v.contentDetails?.duration)} · tap for sentiment →</div><div class="stat-grid"><div class="stat-box"><div class="stat-val" style="color:#3b82f6">${fmt(views)}</div><div class="stat-lbl">Views</div></div><div class="stat-box"><div class="stat-val" style="color:#10b981">${fmt(likes)}</div><div class="stat-lbl">Likes</div></div><div class="stat-box"><div class="stat-val" style="color:#f59e0b">${fmt(comms)}</div><div class="stat-lbl">Cmts</div></div><div class="stat-box"><div class="stat-val" style="color:${ec}">${eng}%</div><div class="stat-lbl">Eng</div></div></div></div></div>`; }).join("")}`,
+      ${sortedVideos.map(v=>{ const views=parseInt(v.statistics?.viewCount||0),likes=parseInt(v.statistics?.likeCount||0),comms=parseInt(v.statistics?.commentCount||0); const eng=views?((likes+comms)/views*100).toFixed(1):"0.0"; const ec=parseFloat(eng)>5?"#10b981":parseFloat(eng)>2?"#f59e0b":"#94a3b8"; const thumb=v.snippet.thumbnails?.maxres?.url||v.snippet.thumbnails?.high?.url||v.snippet.thumbnails?.medium?.url||v.snippet.thumbnails?.default?.url||""; const isRef=goals?.reference_video_ids?.includes(v.id); const safeV=encodeURIComponent(JSON.stringify(v)); return`<div class="video-card" onclick="openVideo(JSON.parse(decodeURIComponent('${safeV}')))">${thumb?`<img src="${thumb}" class="video-thumb-large" onerror="this.style.display='none'"/>`:""}<div class="video-card-body"><div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:4px"><div class="video-card-title" style="flex:1">${cleanTitle(v.snippet.title)}</div>${isRef?`<span style="background:#1e3a5f;color:#3b82f6;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;flex-shrink:0;white-space:nowrap">🎯 Goal video</span>`:""}</div><div class="video-card-meta">${fmtDate(v.snippet.publishedAt)} · ${fmtDur(v.contentDetails?.duration)} · tap for sentiment →</div><div class="stat-grid"><div class="stat-box"><div class="stat-val" style="color:#3b82f6">${fmt(views)}</div><div class="stat-lbl">Views</div></div><div class="stat-box"><div class="stat-val" style="color:#10b981">${fmt(likes)}</div><div class="stat-lbl">Likes</div></div><div class="stat-box"><div class="stat-val" style="color:#f59e0b">${fmt(comms)}</div><div class="stat-lbl">Cmts</div></div><div class="stat-box"><div class="stat-val" style="color:${ec}">${eng}%</div><div class="stat-lbl">Eng</div></div></div></div></div>`; }).join("")}`,
 
     comments:!comments.length?`<div class="empty"><div class="empty-icon">💬</div><div class="empty-title">No comments loaded</div><div class="empty-text">Fetch your comments to view them and run AI analysis.</div><button class="btn" onclick="fetchComments()" ${busy?"disabled":""}>Fetch comments →</button></div>`:`
       <div class="card" style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:13px;font-weight:700">${comments.length} comments</div><div style="font-size:11px;color:#64748b">Across ${videos.length} videos</div></div>${!sentiment?`<button class="btn" onclick="runSentiment()" ${busy?"disabled":""}>Run AI →</button>`:""}</div>
       ${comments.slice(0,50).map(cm=>`<div class="comment-card"><div style="font-size:11px;font-weight:700;color:#3b82f6;margin-bottom:4px">${cm.author}</div><div style="font-size:12px;color:#475569;line-height:1.5;margin-bottom:4px">${cm.text}</div><div style="font-size:10px;color:#94a3b8">${cleanTitle(cm.videoTitle||"").slice(0,50)}</div></div>`).join("")}`,
 
-    sentiment:!sentiment?`<div class="empty"><div class="empty-icon">🤖</div><div class="empty-title">AI Sentiment Analysis</div><div class="empty-text">${comments.length?`${comments.length} comments ready.`:"Fetch comments first."}</div><button class="btn" onclick="${comments.length?"runSentiment()":"fetchComments()"}" ${busy?"disabled":""}>${busy?(comments.length?"Analysing...":"Fetching..."):comments.length?"Run AI analysis →":"Fetch comments first →"}</button></div>`:sentimentBlock(sentiment)+`${isLocked("silver")?`<div class="locked-card" style="height:100px"><div class="card-title">Sentiment over time</div>${lockedOverlay("silver","Sentiment Trends")}</div>`:""}`,
+    sentiment:!sentiment?`<div class="empty"><div class="empty-icon">🤖</div><div class="empty-title">AI Sentiment Analysis</div><div class="empty-text">${goals?.goal?`Analysis will be personalised to your goal: ${goalLabel(goals.goal)}.`:""} ${comments.length?`${comments.length} comments ready.`:"Fetch comments first."}</div><button class="btn" onclick="${comments.length?"runSentiment()":"fetchComments()"}" ${busy?"disabled":""}>${busy?(comments.length?"Analysing...":"Fetching..."):comments.length?"Run AI analysis →":"Fetch comments first →"}</button></div>`:sentimentBlock(sentiment)+`${isLocked("silver")?`<div class="locked-card" style="height:100px"><div class="card-title">Sentiment over time</div>${lockedOverlay("silver","Sentiment Trends")}</div>`:""}`,
 
     advanced: renderAdvanced(filteredVideos, adv),
   };
@@ -757,8 +854,8 @@ function renderDashboard() {
         <div class="logo"><div class="logo-box">YT</div><span class="logo-text">ChannelIQ</span></div>
         <div style="display:flex;align-items:center;gap:8px">
           <span class="${getTierBadgeClass(tier)}">${getTierLabel(tier)}</span>
+          ${goals?.goal?`<div class="goals-indicator" onclick="openGoalFlow()"><div class="goals-indicator-dot"></div><span class="goals-indicator-text">Goals set</span></div>`:`<div class="goals-indicator" onclick="openGoalFlow()" style="border-color:#334155;background:#1e293b"><div class="goals-indicator-dot" style="background:#64748b"></div><span class="goals-indicator-text" style="color:#64748b">Set goals</span></div>`}
           ${status?`<span class="status-pill">${status}</span>`:""}
-          <div style="text-align:right"><div style="color:#f1f5f9;font-size:11px;font-weight:600">${snip.title||""}</div><div style="color:#475569;font-size:10px">${fmt(subs)} subs</div></div>
           <button class="signout-btn" onclick="signOut()">Sign out</button>
         </div>
       </div>

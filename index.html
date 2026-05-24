@@ -4,9 +4,15 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>ChannelIQ — YouTube Analytics</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; }
+
+/* LOADING */
+.loading { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: #0f172a; }
+.loading-text { font-size: 16px; font-weight: 700; color: #f1f5f9; }
+.loading-sub { font-size: 13px; color: #64748b; }
 
 /* ONBOARDING */
 .onboard { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; background: #0f172a; }
@@ -20,8 +26,7 @@ body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; 
 .onboard-input { width: 100%; padding: 14px 16px; background: #0f172a; border: 1.5px solid #334155; border-radius: 12px; font-size: 15px; color: #f1f5f9; font-family: inherit; outline: none; margin-bottom: 16px; }
 .onboard-input:focus { border-color: #3b82f6; }
 .onboard-input::placeholder { color: #475569; }
-.onboard-btn { width: 100%; padding: 14px; background: #3b82f6; color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; transition: background 0.2s; }
-.onboard-btn:hover { background: #2563eb; }
+.onboard-btn { width: 100%; padding: 14px; background: #3b82f6; color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; margin-bottom: 10px; }
 .onboard-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 .onboard-error { background: #ef444422; color: #ef4444; border-radius: 10px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; text-align: center; }
 .onboard-features { display: flex; flex-direction: column; gap: 10px; margin-top: 28px; }
@@ -39,7 +44,32 @@ body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; 
 .tier-silver .tier-name { color: #94a3b8; }
 .tier-gold .tier-name { color: #f59e0b; }
 
-/* TOPBAR */
+/* TEASER */
+.teaser { min-height: 100vh; background: #0f172a; padding: 0 0 80px; }
+.teaser-topbar { background: #0f172a; border-bottom: 1px solid #1e293b; padding: 0 16px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+.teaser-body { padding: 16px 14px; max-width: 600px; margin: 0 auto; }
+.teaser-channel { display: flex; align-items: center; gap: 12px; background: #1e293b; border-radius: 16px; padding: 16px; margin-bottom: 16px; }
+.teaser-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background: #334155; }
+.teaser-name { font-size: 16px; font-weight: 800; color: #f1f5f9; }
+.teaser-handle { font-size: 12px; color: #64748b; }
+.blurred { filter: blur(6px); user-select: none; pointer-events: none; }
+.teaser-kpi-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; margin-bottom: 16px; }
+.teaser-kpi { background: #1e293b; border-radius: 14px; padding: 16px; border-left: 4px solid #334155; }
+.teaser-kpi-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 4px; }
+.teaser-kpi-value { font-size: 26px; font-weight: 800; font-family: monospace; color: #f1f5f9; line-height: 1; margin-bottom: 4px; }
+.teaser-kpi-note { font-size: 11px; color: #475569; line-height: 1.5; }
+.unlock-banner { background: linear-gradient(135deg, #1e3a5f, #1e293b); border: 1.5px solid #3b82f6; border-radius: 16px; padding: 24px 20px; text-align: center; margin-bottom: 16px; }
+.unlock-title { font-size: 18px; font-weight: 800; color: #f1f5f9; margin-bottom: 8px; }
+.unlock-sub { font-size: 13px; color: #94a3b8; margin-bottom: 20px; line-height: 1.6; }
+.google-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px; background: #ffffff; color: #0f172a; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; margin-bottom: 10px; }
+.google-btn:hover { background: #f1f5f9; }
+.google-icon { width: 20px; height: 20px; }
+.teaser-preview { background: #1e293b; border-radius: 16px; padding: 18px 20px; margin-bottom: 12px; position: relative; overflow: hidden; }
+.teaser-preview-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #3b82f6; margin-bottom: 12px; }
+.teaser-preview-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 20%, #0f172a 70%); display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 16px; }
+.teaser-preview-lock { font-size: 11px; color: #64748b; text-align: center; }
+
+/* DASHBOARD */
 .topbar { background: #0f172a; padding: 0 16px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
 .logo { display: flex; align-items: center; gap: 8px; cursor: pointer; }
 .logo-box { width: 26px; height: 26px; background: #ef4444; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: white; }
@@ -48,51 +78,33 @@ body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; 
 .tier-badge-bronze { background: #92400e22; color: #d97706; }
 .tier-badge-silver { background: #47556922; color: #94a3b8; }
 .tier-badge-gold { background: #d9770622; color: #f59e0b; }
-.channel-info { text-align: right; }
-.channel-name { color: #f1f5f9; font-size: 11px; font-weight: 600; }
-.channel-sub { color: #475569; font-size: 10px; }
-
-/* BODY */
 .body { padding: 16px 14px 64px; max-width: 600px; margin: 0 auto; }
-
-/* CARDS */
 .banner { background: #0f172a; border: 1.5px solid #1e3a5f; border-radius: 16px; padding: 18px 20px; margin-bottom: 16px; }
 .banner-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #3b82f6; margin-bottom: 8px; }
 .banner-text { color: #cbd5e1; font-size: 13px; line-height: 1.8; margin-bottom: 14px; }
 .card { background: white; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 18px 20px; margin-bottom: 12px; }
 .card-title { font-size: 13px; font-weight: 700; margin-bottom: 12px; }
 .dark-card { background: #0f172a; border: 1.5px solid #1e3a5f; border-radius: 16px; padding: 18px 20px; margin-bottom: 12px; }
-.locked-card { background: white; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 18px 20px; margin-bottom: 12px; opacity: 0.7; position: relative; overflow: hidden; }
-.locked-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.85); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
-.locked-icon { font-size: 24px; }
+.locked-card { background: white; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 18px 20px; margin-bottom: 12px; position: relative; overflow: hidden; min-height: 100px; }
+.locked-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.92); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
 .locked-text { font-size: 12px; font-weight: 700; color: #0f172a; }
 .locked-sub { font-size: 11px; color: #64748b; text-align: center; padding: 0 20px; }
 .upgrade-btn { padding: 8px 18px; background: #f59e0b; color: white; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 4px; }
-
-/* KPI */
-.kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 16px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; margin-bottom: 16px; }
 .kpi-card { background: white; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 16px; }
 .kpi-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 4px; }
 .kpi-value { font-size: 26px; font-weight: 800; font-family: monospace; line-height: 1; margin-bottom: 6px; }
 .kpi-note { font-size: 11px; color: #64748b; line-height: 1.55; }
-
-/* TABS */
-.tabs { display: flex; gap: 3px; background: #e2e8f0; padding: 3px; border-radius: 10px; margin-bottom: 16px; overflow-x: auto; }
-.tab { flex: 1; min-width: fit-content; padding: 7px 10px; border-radius: 8px; border: none; cursor: pointer; font-family: inherit; font-size: 11px; font-weight: 600; background: transparent; color: #64748b; text-transform: capitalize; white-space: nowrap; }
+.tabs { display: flex; gap: 3px; background: #e2e8f0; padding: 3px; border-radius: 10px; margin-bottom: 16px; }
+.tab { flex: 1; padding: 7px 2px; border-radius: 8px; border: none; cursor: pointer; font-family: inherit; font-size: 11px; font-weight: 600; background: transparent; color: #64748b; text-transform: capitalize; white-space: nowrap; }
 .tab.active { background: white; color: #0f172a; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-
-/* VIDEOS */
 .video-card { background: white; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 14px; margin-bottom: 10px; }
 .video-thumb { width: 88px; height: 50px; object-fit: cover; border-radius: 6px; flex-shrink: 0; }
 .stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; margin-top: 10px; }
 .stat-box { background: #f8fafc; border-radius: 8px; padding: 7px 4px; text-align: center; }
 .stat-val { font-size: 13px; font-weight: 800; font-family: monospace; }
 .stat-lbl { font-size: 9px; color: #94a3b8; margin-top: 2px; }
-
-/* COMMENTS */
 .comment-card { background: white; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 8px; }
-
-/* SENTIMENT */
 .sentiment-bars { display: flex; gap: 8px; margin-bottom: 14px; }
 .sentiment-bar { flex: 1; background: #f8fafc; border-radius: 12px; padding: 12px 8px; text-align: center; }
 .sentiment-pct { font-size: 28px; font-weight: 800; font-family: monospace; line-height: 1; }
@@ -107,8 +119,6 @@ body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; 
 .insight { background: #1e293b; border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; }
 .insight-title { font-size: 12px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px; }
 .insight-body { font-size: 11px; color: #94a3b8; line-height: 1.6; }
-
-/* MISC */
 .btn { padding: 11px 22px; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; color: white; background: #3b82f6; }
 .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 .empty { text-align: center; padding: 36px 20px; }
@@ -120,9 +130,7 @@ body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; 
 .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; }
 .bar { width: 100%; border-radius: 4px 4px 0 0; min-height: 2px; }
 .bar-lbl { font-size: 8px; color: #94a3b8; text-align: center; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.loading { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: #0f172a; }
-.loading-text { font-size: 16px; font-weight: 700; color: #f1f5f9; }
-.loading-sub { font-size: 13px; color: #64748b; }
+.signout-btn { background: #1e293b; color: #64748b; border: none; border-radius: 8px; padding: 4px 10px; font-size: 11px; cursor: pointer; font-family: inherit; }
 </style>
 </head>
 <body>
@@ -130,16 +138,22 @@ body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; 
   <div class="loading">
     <div style="font-size:40px">📡</div>
     <div class="loading-text">ChannelIQ</div>
-    <div class="loading-sub" id="status">Loading...</div>
+    <div class="loading-sub">Loading...</div>
   </div>
 </div>
 
 <script>
+const SUPABASE_URL = "https://ukirtgdeekjzddvgmizs.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVraXJ0Z2RlZWtqemRkdmdtaXpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1Nzk1NTQsImV4cCI6MjA5NTE1NTU1NH0.jtMsJ7u0oSidFc8A3Iu9BfnuUoqdWOVIvjfBCMp7DXE";
 const SERVER = "https://channelliq-server-production.up.railway.app";
 
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 let state = {
-  screen: "onboard",
+  screen: "loading",
+  user: null,
   channel: null,
+  handle: "",
   videos: [],
   comments: [],
   sentiment: null,
@@ -147,7 +161,8 @@ let state = {
   status: "",
   busy: false,
   tier: "bronze",
-  error: ""
+  error: "",
+  backgroundData: null
 };
 
 const fmt = n => n>=1e6?(n/1e6).toFixed(1)+"M":n>=1000?(n/1000).toFixed(1)+"K":String(n||0);
@@ -158,75 +173,156 @@ const fmtDur = (iso="")=>{
   return h?`${h}:${String(mn).padStart(2,"0")}:${String(s).padStart(2,"0")}`:`${mn}:${String(s).padStart(2,"0")}`;
 };
 const fmtDate = iso=>new Date(iso).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});
+const getTier = subs => subs>=100000?"gold":subs>=10000?"silver":"bronze";
+const getTierLabel = t => t==="gold"?"🥇 Gold":t==="silver"?"🥈 Silver":"🥉 Bronze";
+const getTierBadgeClass = t => `tier-badge tier-badge-${t}`;
+const isLocked = (required) => {
+  const order = ["bronze","silver","gold"];
+  return order.indexOf(state.tier) < order.indexOf(required);
+};
 
-function getTier(subs) {
-  if (subs >= 100000) return "gold";
-  if (subs >= 10000) return "silver";
-  return "bronze";
+// ── INIT
+async function init() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    state.user = session.user;
+    const saved = localStorage.getItem("channeliq_handle");
+    if (saved) {
+      state.handle = saved;
+      state.screen = "loading";
+      render();
+      await loadChannel(saved);
+    } else {
+      state.screen = "onboard";
+      render();
+    }
+  } else {
+    state.screen = "onboard";
+    render();
+  }
+
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (event === "SIGNED_IN" && session) {
+      state.user = session.user;
+      if (state.backgroundData && state.handle) {
+        state.channel = state.backgroundData.channel;
+        state.videos = state.backgroundData.videos;
+        state.tier = getTier(parseInt(state.channel.statistics?.subscriberCount||0));
+        state.status = `${state.videos.length} videos loaded ✓`;
+        state.screen = "dashboard";
+        localStorage.setItem("channeliq_handle", state.handle);
+        state.busy = false;
+        render();
+      } else if (state.handle) {
+        await loadChannel(state.handle);
+      } else {
+        state.screen = "onboard";
+        render();
+      }
+    }
+    if (event === "SIGNED_OUT") {
+      state.user = null;
+      state.channel = null;
+      state.videos = [];
+      state.comments = [];
+      state.sentiment = null;
+      state.screen = "onboard";
+      localStorage.removeItem("channeliq_handle");
+      render();
+    }
+  });
 }
 
-function getTierLabel(tier) {
-  return tier === "gold" ? "🥇 Gold" : tier === "silver" ? "🥈 Silver" : "🥉 Bronze";
-}
-
-function getTierBadgeClass(tier) {
-  return `tier-badge tier-badge-${tier}`;
-}
-
+// ── LOOKUP — shows teaser, starts background fetch
 async function lookup() {
-  const handle = document.getElementById("handleInput").value.trim();
+  const input = document.getElementById("handleInput");
+  if (!input) return;
+  const handle = input.value.trim();
   if (!handle) return;
+  state.handle = handle;
   state.error = "";
   state.busy = true;
-  renderOnboard("Searching for your channel...");
+  state.screen = "loading";
+  render();
   try {
     const r = await fetch(`${SERVER}/lookup?handle=${encodeURIComponent(handle)}`);
     const d = await r.json();
-    if (d.error) { state.error = d.error; state.busy = false; renderOnboard(); return; }
+    if (d.error) { state.error = d.error; state.busy = false; state.screen = "onboard"; render(); return; }
     state.channel = d;
-    state.tier = getTier(parseInt(d.statistics?.subscriberCount || 0));
-    state.screen = "loading";
+    state.tier = getTier(parseInt(d.statistics?.subscriberCount||0));
+    state.screen = "teaser";
+    state.busy = false;
     render();
-    await loadVideos();
+    // Background fetch while user reads teaser
+    fetchBackground();
   } catch(e) {
     state.error = "Connection failed. Please try again.";
     state.busy = false;
-    renderOnboard();
+    state.screen = "onboard";
+    render();
   }
 }
 
-async function loadVideos() {
-  state.status = "Loading your videos...";
-  render();
+// ── BACKGROUND FETCH during teaser/signup
+async function fetchBackground() {
   try {
     const r = await fetch(`${SERVER}/videos?channelId=${state.channel.id}`);
     const d = await r.json();
+    state.backgroundData = { channel: state.channel, videos: d.items||[] };
+  } catch(_) {}
+}
+
+// ── GOOGLE SIGN IN
+async function signInWithGoogle() {
+  await sb.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo: "https://ytanalyst.netlify.app" }
+  });
+}
+
+// ── SIGN OUT
+async function signOut() {
+  await sb.auth.signOut();
+}
+
+// ── LOAD CHANNEL (for returning users)
+async function loadChannel(handle) {
+  state.status = "Loading your channel...";
+  state.screen = "loading";
+  render();
+  try {
+    const r = await fetch(`${SERVER}/lookup?handle=${encodeURIComponent(handle)}`);
+    const d = await r.json();
     if (d.error) throw new Error(d.error);
-    state.videos = d.items || [];
+    state.channel = d;
+    state.tier = getTier(parseInt(d.statistics?.subscriberCount||0));
+    const vr = await fetch(`${SERVER}/videos?channelId=${d.id}`);
+    const vd = await vr.json();
+    state.videos = vd.items||[];
     state.status = `${state.videos.length} videos loaded ✓`;
     state.screen = "dashboard";
     state.busy = false;
     render();
   } catch(e) {
-    state.status = "Error loading videos: " + e.message;
-    state.busy = false;
+    state.error = e.message;
+    state.screen = "onboard";
     render();
   }
 }
 
 async function fetchComments() {
-  if (state.busy || !state.videos.length) return;
+  if (state.busy||!state.videos.length) return;
   state.busy = true;
   const all = [];
   for (const v of state.videos) {
-    state.status = `Fetching comments: ${v.snippet.title.slice(0,25)}...`;
+    state.status = `Fetching: ${v.snippet.title.slice(0,25)}...`;
     render();
     try {
       const r = await fetch(`${SERVER}/comments?videoId=${v.id}`);
       const d = await r.json();
-      d.items?.forEach(item => {
+      d.items?.forEach(item=>{
         const top = item.snippet.topLevelComment.snippet;
-        all.push({ videoId: v.id, videoTitle: v.snippet.title, text: top.textDisplay, likes: top.likeCount, author: top.authorDisplayName });
+        all.push({videoId:v.id,videoTitle:v.snippet.title,text:top.textDisplay,likes:top.likeCount,author:top.authorDisplayName});
       });
     } catch(_) {}
   }
@@ -238,30 +334,30 @@ async function fetchComments() {
 }
 
 async function runSentiment(data) {
-  const src = data || state.comments;
+  const src = data||state.comments;
   if (!src.length) return;
   state.busy = true;
   state.status = "Running AI analysis...";
   render();
   try {
-    const r = await fetch(`${SERVER}/sentiment`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ comments: src })
+    const r = await fetch(`${SERVER}/sentiment`,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({comments:src})
     });
-    if (!r.ok) throw new Error(`Sentiment error ${r.status}`);
+    if (!r.ok) throw new Error(`Error ${r.status}`);
     state.sentiment = await r.json();
     state.status = "Analysis complete ✓";
     state.tab = "sentiment";
-  } catch(e) { state.status = "AI error: " + e.message; }
+  } catch(e) { state.status = "AI error: "+e.message; }
   state.busy = false;
   render();
 }
 
-function setTab(t) { state.tab = t; render(); }
-function disconnect() { state = { screen:"onboard", channel:null, videos:[], comments:[], sentiment:null, tab:"overview", status:"", busy:false, tier:"bronze", error:"" }; render(); }
+function setTab(t) { state.tab=t; render(); }
 
-function renderOnboard(loadingMsg) {
+// ── RENDER ONBOARD
+function renderOnboard() {
   document.getElementById("app").innerHTML = `
     <div class="onboard">
       <div class="onboard-logo">
@@ -270,86 +366,147 @@ function renderOnboard(loadingMsg) {
       </div>
       <div class="onboard-card">
         <div class="onboard-title">Understand your channel</div>
-        <div class="onboard-sub">Enter your YouTube handle to get AI-powered analytics, sentiment analysis, and growth insights — free to start.</div>
-        ${state.error ? `<div class="onboard-error">${state.error}</div>` : ""}
+        <div class="onboard-sub">Enter your YouTube handle to see AI-powered insights for free.</div>
+        ${state.error?`<div class="onboard-error">${state.error}</div>`:""}
         <label class="onboard-label">Your YouTube handle</label>
-        <input class="onboard-input" id="handleInput" placeholder="@yourchannel" ${state.busy?"disabled":""} onkeydown="if(event.key==='Enter')lookup()"/>
-        <button class="onboard-btn" onclick="lookup()" ${state.busy?"disabled":""}>
-          ${loadingMsg || "Analyse my channel →"}
-        </button>
+        <input class="onboard-input" id="handleInput" placeholder="@yourchannel" onkeydown="if(event.key==='Enter')lookup()"/>
+        <button class="onboard-btn" onclick="lookup()">Preview my channel →</button>
         <div class="tiers">
-          <div class="tier tier-bronze"><div class="tier-name">🥉 Bronze</div><div class="tier-range">0 – 10k subs</div><div class="tier-range" style="color:#d97706;margin-top:2px">Free</div></div>
-          <div class="tier tier-silver"><div class="tier-name">🥈 Silver</div><div class="tier-range">10k – 100k subs</div><div class="tier-range" style="color:#94a3b8;margin-top:2px">£19/mo</div></div>
+          <div class="tier tier-bronze"><div class="tier-name">🥉 Bronze</div><div class="tier-range">0–10k subs</div><div class="tier-range" style="color:#d97706;margin-top:2px">Free</div></div>
+          <div class="tier tier-silver"><div class="tier-name">🥈 Silver</div><div class="tier-range">10k–100k</div><div class="tier-range" style="color:#94a3b8;margin-top:2px">£19/mo</div></div>
           <div class="tier tier-gold"><div class="tier-name">🥇 Gold</div><div class="tier-range">100k+ subs</div><div class="tier-range" style="color:#f59e0b;margin-top:2px">£49/mo</div></div>
         </div>
         <div class="onboard-features">
-          <div class="onboard-feature"><div class="onboard-feature-icon">📊</div><div class="onboard-feature-text"><strong style="color:#f1f5f9">KPI dashboard</strong> — views, engagement, growth metrics explained in plain English</div></div>
-          <div class="onboard-feature"><div class="onboard-feature-icon">🤖</div><div class="onboard-feature-text"><strong style="color:#f1f5f9">AI sentiment analysis</strong> — understand what your audience loves, hates, and wants more of</div></div>
+          <div class="onboard-feature"><div class="onboard-feature-icon">📊</div><div class="onboard-feature-text"><strong style="color:#f1f5f9">KPI dashboard</strong> — views, engagement and growth explained in plain English</div></div>
+          <div class="onboard-feature"><div class="onboard-feature-icon">🤖</div><div class="onboard-feature-text"><strong style="color:#f1f5f9">AI sentiment analysis</strong> — what your audience loves, hates and wants more of</div></div>
           <div class="onboard-feature"><div class="onboard-feature-icon">📈</div><div class="onboard-feature-text"><strong style="color:#f1f5f9">Growth insights</strong> — actionable recommendations tailored to your channel</div></div>
         </div>
       </div>
     </div>`;
 }
 
-function render() {
-  if (state.screen === "onboard") { renderOnboard(); return; }
+// ── RENDER TEASER
+function renderTeaser() {
+  const ch = state.channel;
+  const snip = ch.snippet||{};
+  const st = ch.statistics||{};
+  const subs = parseInt(st.subscriberCount||0);
+  const views = parseInt(st.viewCount||0);
+  const vids = parseInt(st.videoCount||0);
 
-  if (state.screen === "loading") {
-    document.getElementById("app").innerHTML = `
-      <div class="loading">
-        <div style="font-size:40px">📡</div>
-        <div class="loading-text">Connecting to your channel...</div>
-        <div class="loading-sub">${state.status}</div>
-      </div>`;
-    return;
-  }
+  const fakeKpis = [
+    {label:"Subscribers", value:fmt(subs), color:"#3b82f6", icon:"👥", blur:false},
+    {label:"Total Views", value:fmt(views), color:"#10b981", icon:"👁", blur:false},
+    {label:"Engagement Rate", value:"4.8%", color:"#06b6d4", icon:"📊", blur:true},
+    {label:"Sub Conv. Rate", value:"0.42%", color:"#8b5cf6", icon:"🔄", blur:true},
+    {label:"Avg View Duration", value:"5m 12s", color:"#f59e0b", icon:"⏱", blur:true},
+    {label:"Top Traffic Source", value:"Search 61%", color:"#ef4444", icon:"🔍", blur:true},
+  ];
 
-  const {channel, videos, comments, sentiment, tab, status, busy, tier} = state;
-  const st = channel.statistics || {};
-  const snip = channel.snippet || {};
-  const subs = parseInt(st.subscriberCount || 0);
-  const totViews = parseInt(st.viewCount || 0);
-  const vidCount = parseInt(st.videoCount || 0);
+  document.getElementById("app").innerHTML = `
+    <div class="teaser">
+      <div class="teaser-topbar">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="logo-box">YT</div>
+          <span style="color:#f1f5f9;font-weight:700;font-size:14px">ChannelIQ</span>
+        </div>
+        <button class="signout-btn" onclick="state.screen='onboard';render()">← Change channel</button>
+      </div>
+      <div class="teaser-body">
+        <div class="teaser-channel">
+          ${snip.thumbnails?.default?.url?`<img class="teaser-avatar" src="${snip.thumbnails.default.url}"/>`:`<div class="teaser-avatar" style="display:flex;align-items:center;justify-content:center;font-size:20px">📺</div>`}
+          <div>
+            <div class="teaser-name">${snip.title||"Your Channel"}</div>
+            <div class="teaser-handle">@${snip.customUrl?.replace("@","")||""} · ${getTierLabel(state.tier)} tier</div>
+          </div>
+        </div>
+
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#64748b;margin-bottom:8px">Your KPIs — sign in to unlock all</div>
+        <div class="teaser-kpi-grid">
+          ${fakeKpis.map(k=>`
+            <div class="teaser-kpi" style="border-left-color:${k.color}">
+              <div class="teaser-kpi-label">${k.icon} ${k.label}</div>
+              <div class="teaser-kpi-value ${k.blur?"blurred":""}" style="color:${k.color}">${k.value}</div>
+            </div>`).join("")}
+        </div>
+
+        <div class="unlock-banner">
+          <div style="font-size:28px;margin-bottom:8px">🔓</div>
+          <div class="unlock-title">Your insights are ready</div>
+          <div class="unlock-sub">Sign in with Google to unlock your full dashboard — engagement analysis, AI sentiment, growth recommendations and more. Free for ${getTierLabel(state.tier)} channels.</div>
+          <button class="google-btn" onclick="signInWithGoogle()">
+            <svg class="google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Continue with Google
+          </button>
+        </div>
+
+        <div class="teaser-preview" style="min-height:160px">
+          <div class="teaser-preview-label">🤖 AI Sentiment Analysis</div>
+          <div class="blurred" style="color:#cbd5e1;font-size:13px;line-height:1.8">
+            Your audience responds most positively to your tutorial content and production quality. Comment themes show strong demand for more in-depth guides. Engagement spikes when you ask questions directly to viewers. Your reply rate is driving exceptional loyalty metrics compared to similar channels.
+          </div>
+          <div class="teaser-preview-overlay">
+            <div class="teaser-preview-lock">🔒 Sign in to see your real sentiment analysis</div>
+          </div>
+        </div>
+
+        <div class="teaser-preview" style="min-height:120px">
+          <div class="teaser-preview-label">📈 Growth Recommendations</div>
+          <div class="blurred" style="color:#cbd5e1;font-size:13px;line-height:1.8">
+            Post on Tuesday and Thursday between 6-8pm GMT to maximise your UK audience reach. Your current upload cadence is below optimal. Increasing to 2 videos per week could accelerate subscriber growth by an estimated 40%. Your thumbnail CTR has room to improve.
+          </div>
+          <div class="teaser-preview-overlay">
+            <div class="teaser-preview-lock">🔒 Sign in to unlock your growth plan</div>
+          </div>
+        </div>
+
+      </div>
+    </div>`;
+}
+
+// ── RENDER DASHBOARD
+function renderDashboard() {
+  const {channel, videos, comments, sentiment, tab, status, busy, tier, user} = state;
+  const st = channel.statistics||{};
+  const snip = channel.snippet||{};
+  const subs = parseInt(st.subscriberCount||0);
+  const totViews = parseInt(st.viewCount||0);
+  const vidCount = parseInt(st.videoCount||0);
   const totLikes = videos.reduce((s,v)=>s+parseInt(v.statistics?.likeCount||0),0);
   const totComms = videos.reduce((s,v)=>s+parseInt(v.statistics?.commentCount||0),0);
   const vidViews = videos.reduce((s,v)=>s+parseInt(v.statistics?.viewCount||0),0);
-  const engRate = vidViews ? ((totLikes+totComms)/vidViews*100).toFixed(2) : "0.00";
+  const engRate = vidViews?((totLikes+totComms)/vidViews*100).toFixed(2):"0.00";
   const topVideo = [...videos].sort((a,b)=>parseInt(b.statistics?.viewCount||0)-parseInt(a.statistics?.viewCount||0))[0];
   const maxViews = Math.max(...videos.map(v=>parseInt(v.statistics?.viewCount||0)),1);
 
   const kpis = [
-    {label:"Subscribers", value:fmt(subs), color:"#3b82f6", icon:"👥", note:subs<1000?"Early stage — consistency and SEO titles are the fastest path to 1,000.":"Solid base. Focus on converting views to subscribers."},
-    {label:"Total Views", value:fmt(totViews), color:"#10b981", icon:"👁", note:"Lifetime views. Every video compounds your reach over time."},
-    {label:"Videos", value:vidCount, color:"#f59e0b", icon:"🎬", note:"Consistency is the #1 growth driver. Aim for 1 video per week."},
-    {label:"Likes", value:fmt(totLikes), color:"#ef4444", icon:"👍", note:"Likes are a direct ranking signal. Above 4% like-to-view is strong."},
-    {label:"Comments", value:fmt(totComms), color:"#8b5cf6", icon:"💬", note:"Reply to every comment — builds loyalty and signals activity to YouTube."},
-    {label:"Engagement", value:engRate+"%", color:"#06b6d4", icon:"📊", note:parseFloat(engRate)>5?"Above average — strong content-audience fit.":"Ask a question at the end of each video to lift this."},
+    {label:"Subscribers", value:fmt(subs), color:"#3b82f6", icon:"👥", note:subs<1000?"Consistency and SEO titles are the fastest path to 1,000.":"Solid base. Focus on converting views to subscribers."},
+    {label:"Total Views", value:fmt(totViews), color:"#10b981", icon:"👁", note:"Lifetime views. Every video compounds your reach."},
+    {label:"Videos", value:vidCount, color:"#f59e0b", icon:"🎬", note:"Aim for 1 video per week minimum to build algorithmic momentum."},
+    {label:"Likes", value:fmt(totLikes), color:"#ef4444", icon:"👍", note:"Above 4% like-to-view ratio is strong. Remind viewers naturally."},
+    {label:"Comments", value:fmt(totComms), color:"#8b5cf6", icon:"💬", note:"Reply to every comment — doubles the count and builds loyalty."},
+    {label:"Engagement", value:engRate+"%", color:"#06b6d4", icon:"📊", note:parseFloat(engRate)>5?"Above average — strong content-audience fit.":"End videos with a direct question to lift this."},
   ];
 
   const sortedVideos = [...videos].sort((a,b)=>parseInt(b.statistics?.viewCount||0)-parseInt(a.statistics?.viewCount||0));
 
-  const isLocked = (requiredTier) => {
-    const order = ["bronze","silver","gold"];
-    return order.indexOf(tier) < order.indexOf(requiredTier);
-  };
-
-  const lockedOverlay = (requiredTier, feature) => `
+  const lockedOverlay = (required, feature) => `
     <div class="locked-overlay">
-      <div class="locked-icon">🔒</div>
+      <div style="font-size:22px">🔒</div>
       <div class="locked-text">${feature}</div>
-      <div class="locked-sub">Available on ${requiredTier.charAt(0).toUpperCase()+requiredTier.slice(1)} tier and above</div>
+      <div class="locked-sub">Available on ${required.charAt(0).toUpperCase()+required.slice(1)} tier</div>
       <button class="upgrade-btn">Upgrade to unlock</button>
     </div>`;
 
   const tabContent = {
-    overview: `
+    overview:`
       <div class="card">
         <div class="card-title">Views per video</div>
         <div class="bar-chart">
           ${[...videos].sort((a,b)=>new Date(a.snippet.publishedAt)-new Date(b.snippet.publishedAt)).map((v,i,arr)=>{
-            const views = parseInt(v.statistics?.viewCount||0);
-            const h = Math.max((views/maxViews)*100,2);
-            return `<div class="bar-wrap">
+            const views=parseInt(v.statistics?.viewCount||0);
+            const h=Math.max((views/maxViews)*100,2);
+            return`<div class="bar-wrap">
               <div style="flex:1;display:flex;align-items:flex-end;width:100%">
                 <div class="bar" style="height:${h}%;background:${i===arr.length-1?"#3b82f6":"#bfdbfe"}"></div>
               </div>
@@ -361,29 +518,21 @@ function render() {
       <div class="dark-card">
         <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#3b82f6;margin-bottom:10px">📋 What your data is telling you</div>
         ${[
-          {t:"Foundation phase", b:`${vidCount} videos is the beginning. Stay consistent — every video trains the algorithm.`},
-          {t:"Engagement beats views", b:"50 views and 10 comments beats 500 views and silence. Early engagement decides if YouTube pushes your video wider."},
-          {t:"Your blueprint", b:topVideo?`"${topVideo.snippet.title}" is your top performer. Study its title, length and topic — repeat that formula.`:"Keep publishing — patterns will emerge."},
-          {t:"Run sentiment", b:"Even with few comments, AI analysis surfaces what your audience responds to most."},
-        ].map(item=>`
-          <div class="insight">
-            <div class="insight-title">${item.t}</div>
-            <div class="insight-body">${item.b}</div>
-          </div>`).join("")}
+          {t:"Foundation phase",b:`${vidCount} videos is the beginning. Every video trains the algorithm and compounds your reach.`},
+          {t:"Engagement beats views",b:"50 views and 10 comments beats 500 views and silence. Early engagement decides if YouTube pushes your video wider."},
+          {t:"Your blueprint",b:topVideo?`"${topVideo.snippet.title}" is your top performer. Study its title, length and topic — repeat that formula.`:"Keep publishing — patterns will emerge."},
+          {t:"Run sentiment",b:"Tap 'Fetch comments' to get AI analysis of what your audience loves and wants more of."},
+        ].map(item=>`<div class="insight"><div class="insight-title">${item.t}</div><div class="insight-body">${item.b}</div></div>`).join("")}
       </div>
-      ${isLocked("silver") ? `
-        <div class="locked-card" style="height:120px">
-          <div class="card-title">Posting time analysis</div>
-          ${lockedOverlay("silver","Posting Time vs Audience Insights")}
-        </div>` : ""}`,
+      ${isLocked("silver")?`<div class="locked-card" style="height:100px"><div class="card-title">Posting time vs audience insights</div>${lockedOverlay("silver","Posting Time Analysis")}</div>`:""}`,
 
-    videos: sortedVideos.map(v => {
-      const views = parseInt(v.statistics?.viewCount||0);
-      const likes = parseInt(v.statistics?.likeCount||0);
-      const comms = parseInt(v.statistics?.commentCount||0);
-      const eng = views?((likes+comms)/views*100).toFixed(1):"0.0";
-      const ec = parseFloat(eng)>5?"#10b981":parseFloat(eng)>2?"#f59e0b":"#94a3b8";
-      return `<div class="video-card">
+    videos: sortedVideos.map(v=>{
+      const views=parseInt(v.statistics?.viewCount||0);
+      const likes=parseInt(v.statistics?.likeCount||0);
+      const comms=parseInt(v.statistics?.commentCount||0);
+      const eng=views?((likes+comms)/views*100).toFixed(1):"0.0";
+      const ec=parseFloat(eng)>5?"#10b981":parseFloat(eng)>2?"#f59e0b":"#94a3b8";
+      return`<div class="video-card">
         <div style="display:flex;gap:10px;margin-bottom:10px">
           <img src="${v.snippet.thumbnails?.medium?.url||v.snippet.thumbnails?.default?.url||""}" class="video-thumb" onerror="this.style.display='none'"/>
           <div style="flex:1">
@@ -400,18 +549,15 @@ function render() {
       </div>`;
     }).join(""),
 
-    comments: !comments.length ? `
+    comments:!comments.length?`
       <div class="empty">
         <div class="empty-icon">💬</div>
         <div class="empty-title">No comments loaded</div>
         <div class="empty-text">Fetch your comments to view them and run AI analysis.</div>
         <button class="btn" onclick="fetchComments()" ${busy?"disabled":""}>Fetch comments →</button>
-      </div>` : `
+      </div>`:`
       <div class="card" style="display:flex;justify-content:space-between;align-items:center">
-        <div>
-          <div style="font-size:13px;font-weight:700">${comments.length} comments</div>
-          <div style="font-size:11px;color:#64748b">Across ${videos.length} videos</div>
-        </div>
+        <div><div style="font-size:13px;font-weight:700">${comments.length} comments</div><div style="font-size:11px;color:#64748b">Across ${videos.length} videos</div></div>
         ${!sentiment?`<button class="btn" onclick="runSentiment()" ${busy?"disabled":""}>Run AI →</button>`:""}
       </div>
       ${comments.slice(0,50).map(cm=>`
@@ -421,7 +567,7 @@ function render() {
           <div style="font-size:10px;color:#94a3b8">${(cm.videoTitle||"").slice(0,50)}</div>
         </div>`).join("")}`,
 
-    sentiment: !sentiment ? `
+    sentiment:!sentiment?`
       <div class="empty">
         <div class="empty-icon">🤖</div>
         <div class="empty-title">AI Sentiment Analysis</div>
@@ -429,7 +575,7 @@ function render() {
         <button class="btn" onclick="${comments.length?"runSentiment()":"fetchComments()"}" ${busy?"disabled":""}>
           ${busy?(comments.length?"Analysing...":"Fetching..."):comments.length?"Run AI analysis →":"Fetch comments first →"}
         </button>
-      </div>` : `
+      </div>`:`
       <div class="card">
         <div class="card-title">Overall Sentiment</div>
         <div class="sentiment-bars">
@@ -443,7 +589,7 @@ function render() {
       </div>
       ${(sentiment.themes||[]).map(th=>{
         const tc=th.sentiment==="positive"?"#10b981":th.sentiment==="negative"?"#ef4444":"#f59e0b";
-        return `<div class="theme-card">
+        return`<div class="theme-card">
           <div class="theme-header">
             <div style="font-size:13px;font-weight:700">${th.theme}</div>
             <span class="pill" style="background:${tc}22;color:${tc}">${th.sentiment} · ${th.count}</span>
@@ -456,64 +602,75 @@ function render() {
         <p style="color:#cbd5e1;font-size:13px;line-height:1.85;margin-bottom:16px">${sentiment.summary}</p>
         ${sentiment.quickWins?.length?`
           <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#f59e0b;margin-bottom:10px">⚡ Quick wins</div>
-          ${sentiment.quickWins.map(w=>`
-            <div class="quick-win">
-              <span style="color:#10b981;font-weight:800;flex-shrink:0">→</span>
-              <p style="font-size:12px;color:#94a3b8;line-height:1.65;margin:0">${w}</p>
-            </div>`).join("")}`:""}
+          ${sentiment.quickWins.map(w=>`<div class="quick-win"><span style="color:#10b981;font-weight:800;flex-shrink:0">→</span><p style="font-size:12px;color:#94a3b8;line-height:1.65;margin:0">${w}</p></div>`).join("")}`:""}
       </div>
-      ${isLocked("silver")?`
-        <div class="locked-card" style="height:100px">
-          <div class="card-title">Sentiment over time</div>
-          ${lockedOverlay("silver","Sentiment Trends")}
-        </div>`:""}`,
+      ${isLocked("silver")?`<div class="locked-card" style="height:100px"><div class="card-title">Sentiment over time</div>${lockedOverlay("silver","Sentiment Trends")}</div>`:""}`,
   };
 
   document.getElementById("app").innerHTML = `
-    <div class="topbar">
-      <div class="logo" onclick="disconnect()">
-        <div class="logo-box">YT</div>
-        <span class="logo-text">ChannelIQ</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <span class="${getTierBadgeClass(tier)}">${getTierLabel(tier)}</span>
-        ${status?`<span class="status-pill">${status}</span>`:""}
-        <div class="channel-info">
-          <div class="channel-name">${snip.title||""}</div>
-          <div class="channel-sub">${fmt(subs)} subs · ${vidCount} videos</div>
+    <div style="min-height:100vh;background:#f1f5f9">
+      <div class="topbar">
+        <div class="logo">
+          <div class="logo-box">YT</div>
+          <span class="logo-text">ChannelIQ</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="${getTierBadgeClass(tier)}">${getTierLabel(tier)}</span>
+          ${status?`<span class="status-pill">${status}</span>`:""}
+          <div style="text-align:right">
+            <div style="color:#f1f5f9;font-size:11px;font-weight:600">${snip.title||""}</div>
+            <div style="color:#475569;font-size:10px">${fmt(subs)} subs</div>
+          </div>
+          <button class="signout-btn" onclick="signOut()">Sign out</button>
         </div>
       </div>
-    </div>
-    <div class="body">
-      <div class="banner">
-        <div class="banner-label">📡 ${snip.title} — ${getTierLabel(tier)} Tier</div>
-        <div class="banner-text">
-          ${vidCount} video${vidCount!==1?"s":""} · ${fmt(totViews)} total views · ${fmt(subs)} subscribers.
-          ${topVideo?`Top performer: "${topVideo.snippet.title}".`:""}
-          ${tier==="bronze"?" Upgrade to Silver to unlock advanced insights.":""}
+      <div class="body">
+        <div class="banner">
+          <div class="banner-label">📡 ${snip.title} — ${getTierLabel(tier)} Tier</div>
+          <div class="banner-text">
+            ${vidCount} video${vidCount!==1?"s":""} · ${fmt(totViews)} total views · ${fmt(subs)} subscribers.
+            ${topVideo?` Top performer: "${topVideo.snippet.title}".`:""}
+            ${tier==="bronze"?" Upgrade to Silver to unlock advanced insights.":""}
+          </div>
+          ${!comments.length&&!busy?`<button class="btn" onclick="fetchComments()">Fetch comments &amp; run AI sentiment →</button>`:""}
+          ${busy?`<span style="font-size:13px;color:#94a3b8">${status}</span>`:""}
+          ${comments.length&&!busy?`<span style="font-size:13px;color:#10b981;font-weight:600">✓ ${comments.length} comments${sentiment?" · Sentiment ready":""}</span>`:""}
         </div>
-        ${!comments.length&&!busy?`<button class="btn" onclick="fetchComments()">Fetch comments &amp; run AI sentiment →</button>`:""}
-        ${busy?`<span style="font-size:13px;color:#94a3b8">${status}</span>`:""}
-        ${comments.length&&!busy?`<span style="font-size:13px;color:#10b981;font-weight:600">✓ ${comments.length} comments${sentiment?" · Sentiment ready":""}</span>`:""}
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#64748b;margin-bottom:8px">KPIs</div>
+        <div class="kpi-grid">
+          ${kpis.map(k=>`
+            <div class="kpi-card" style="border-left:4px solid ${k.color}">
+              <div class="kpi-label">${k.icon} ${k.label}</div>
+              <div class="kpi-value" style="color:${k.color}">${k.value}</div>
+              <div class="kpi-note">${k.note}</div>
+            </div>`).join("")}
+        </div>
+        <div class="tabs">
+          ${["overview","videos","comments","sentiment"].map(t=>`
+            <button class="tab ${tab===t?"active":""}" onclick="setTab('${t}')">${t}${t==="sentiment"&&sentiment?" ✓":""}</button>`).join("")}
+        </div>
+        <div>${tabContent[tab]||""}</div>
       </div>
-      <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#64748b;margin-bottom:8px">KPIs</div>
-      <div class="kpi-grid">
-        ${kpis.map(k=>`
-          <div class="kpi-card" style="border-left:4px solid ${k.color}">
-            <div class="kpi-label">${k.icon} ${k.label}</div>
-            <div class="kpi-value" style="color:${k.color}">${k.value}</div>
-            <div class="kpi-note">${k.note}</div>
-          </div>`).join("")}
-      </div>
-      <div class="tabs">
-        ${["overview","videos","comments","sentiment"].map(t=>`
-          <button class="tab ${tab===t?"active":""}" onclick="setTab('${t}')">${t}${t==="sentiment"&&sentiment?" ✓":""}</button>`).join("")}
-      </div>
-      <div>${tabContent[tab]||""}</div>
     </div>`;
 }
 
-render();
+// ── MAIN RENDER
+function render() {
+  if (state.screen==="loading") {
+    document.getElementById("app").innerHTML=`
+      <div class="loading">
+        <div style="font-size:40px">📡</div>
+        <div class="loading-text">ChannelIQ</div>
+        <div class="loading-sub">${state.status||"Loading..."}</div>
+      </div>`;
+    return;
+  }
+  if (state.screen==="onboard") { renderOnboard(); return; }
+  if (state.screen==="teaser") { renderTeaser(); return; }
+  if (state.screen==="dashboard") { renderDashboard(); return; }
+}
+
+init();
 </script>
 </body>
 </html>

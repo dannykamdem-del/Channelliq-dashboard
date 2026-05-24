@@ -760,6 +760,7 @@ async function init() {
       const h=localStorage.getItem("channeliq_handle");
       if (!h) { state.screen="onboard"; render(); return; }
       state.handle=h;
+      // If channel already loaded in this session, go straight to dashboard
       if (state.channel && state.videos.length) {
         state.screen="dashboard"; state.busy=false; render();
         scheduleGoalPrompt();
@@ -783,6 +784,7 @@ async function init() {
       render();
     }
   });
+}
 
 async function lookup() {
   const input=document.getElementById("handleInput");
@@ -795,6 +797,7 @@ async function lookup() {
     const d=await r.json();
     if (d.error) { state.error=d.error; state.busy=false; state.screen="onboard"; render(); return; }
     state.channel=d; state.tier=getTier(parseInt(d.statistics?.subscriberCount||0));
+    // Save handle immediately so it survives the OAuth redirect
     localStorage.setItem("channeliq_handle", handle);
     state.screen="teaser"; state.busy=false; render(); fetchBackground();
   } catch(e) { state.error="Connection failed. Please try again."; state.busy=false; state.screen="onboard"; render(); }

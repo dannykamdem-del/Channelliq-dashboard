@@ -102,7 +102,7 @@ body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; 
 .progress { height: 4px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
 .progress-fill { height: 100%; border-radius: 4px; }
 .theme-card { background: white; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 14px; margin-bottom: 10px; }
-.theme-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.theme-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px; }
 .pill { padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; }
 .quote { background: #f8fafc; border-radius: 8px; padding: 6px 10px; font-size: 11px; color: #475569; font-style: italic; margin-bottom: 5px; }
 .quick-win { background: #1e293b; border-radius: 10px; padding: 10px 13px; display: flex; gap: 8px; margin-bottom: 8px; }
@@ -121,6 +121,14 @@ body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; 
 .bar { width: 100%; border-radius: 4px 4px 0 0; min-height: 2px; }
 .bar-lbl { font-size: 8px; color: #94a3b8; text-align: center; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .signout-btn { background: #1e293b; color: #64748b; border: none; border-radius: 8px; padding: 4px 10px; font-size: 11px; cursor: pointer; font-family: inherit; }
+.pipeline-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; margin-bottom: 0; }
+.pipeline-stat { background: #1e293b; border-radius: 10px; padding: 10px 12px; }
+.pipeline-val { font-size: 20px; font-weight: 800; font-family: monospace; }
+.pipeline-lbl { font-size: 10px; color: #64748b; margin-top: 2px; }
+.sw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.sw-card { background: white; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 14px; }
+.sw-title { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+.sw-item { font-size: 12px; color: #475569; padding: 5px 0; border-bottom: 1px solid #f1f5f9; line-height: 1.5; }
 </style>
 </head>
 <body>
@@ -140,7 +148,8 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let state = {
   screen:"loading", user:null, channel:null, handle:"",
   videos:[], comments:[], sentiment:null, tab:"overview",
-  status:"", busy:false, tier:"bronze", error:"", backgroundData:null
+  status:"", busy:false, tier:"bronze", error:"", backgroundData:null,
+  goal:"", creatorType:""
 };
 
 const fmt = n=>n>=1e6?(n/1e6).toFixed(1)+"M":n>=1000?(n/1000).toFixed(1)+"K":String(n||0);
@@ -162,7 +171,6 @@ const isLocked = required=>{
 async function init() {
   const { data:{ session } } = await sb.auth.getSession();
   const saved = localStorage.getItem("channeliq_handle");
-
   if (session) {
     state.user = session.user;
     if (saved) {
@@ -179,7 +187,6 @@ async function init() {
     state.screen = "onboard";
     render();
   }
-
   sb.auth.onAuthStateChange(async (event, session) => {
     if (event === "SIGNED_IN" && session) {
       state.user = session.user;
@@ -251,9 +258,7 @@ async function signInWithGoogle() {
   });
 }
 
-async function signOut() {
-  await sb.auth.signOut();
-}
+async function signOut() { await sb.auth.signOut(); }
 
 async function loadChannel(handle) {
   state.status="Loading your channel...";
@@ -308,7 +313,11 @@ async function runSentiment(data) {
     const r=await fetch(`${SERVER}/sentiment`,{
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({comments:src})
+      body:JSON.stringify({
+        comments:src,
+        goal: state.goal||"",
+        creatorType: state.creatorType||""
+      })
     });
     if (!r.ok) throw new Error(`Error ${r.status}`);
     state.sentiment=await r.json();
@@ -320,7 +329,7 @@ async function runSentiment(data) {
 
 function setTab(t) { state.tab=t; render(); }
 
-  function renderOnboard() {
+function renderOnboard() {
   document.getElementById("app").innerHTML=`
     <div class="onboard">
       <div class="onboard-logo">
@@ -423,6 +432,7 @@ function renderDashboard() {
   const engRate=vidViews?((totLikes+totComms)/vidViews*100).toFixed(2):"0.00";
   const topVideo=[...videos].sort((a,b)=>parseInt(b.statistics?.viewCount||0)-parseInt(a.statistics?.viewCount||0))[0];
   const maxViews=Math.max(...videos.map(v=>parseInt(v.statistics?.viewCount||0)),1);
+
   const kpis=[
     {label:"Subscribers",value:fmt(subs),color:"#3b82f6",icon:"👥",note:subs<1000?"Consistency and SEO titles are the fastest path to 1,000.":"Solid base. Focus on converting views to subscribers."},
     {label:"Total Views",value:fmt(totViews),color:"#10b981",icon:"👁",note:"Lifetime views. Every video compounds your reach."},
@@ -431,7 +441,9 @@ function renderDashboard() {
     {label:"Comments",value:fmt(totComms),color:"#8b5cf6",icon:"💬",note:"Reply to every comment — doubles the count and builds loyalty."},
     {label:"Engagement",value:engRate+"%",color:"#06b6d4",icon:"📊",note:parseFloat(engRate)>5?"Above average — strong content-audience fit.":"End videos with a direct question to lift this."},
   ];
+
   const sortedVideos=[...videos].sort((a,b)=>parseInt(b.statistics?.viewCount||0)-parseInt(a.statistics?.viewCount||0));
+
   const lockedOverlay=(required,feature)=>`
     <div class="locked-overlay">
       <div style="font-size:22px">🔒</div>
@@ -439,6 +451,7 @@ function renderDashboard() {
       <div class="locked-sub">Available on ${required.charAt(0).toUpperCase()+required.slice(1)} tier</div>
       <button class="upgrade-btn">Upgrade to unlock</button>
     </div>`;
+
   const tabContent={
     overview:`
       <div class="card">
@@ -461,6 +474,7 @@ function renderDashboard() {
         ].map(item=>`<div class="insight"><div class="insight-title">${item.t}</div><div class="insight-body">${item.b}</div></div>`).join("")}
       </div>
       ${isLocked("silver")?`<div class="locked-card" style="height:100px"><div class="card-title">Posting time vs audience insights</div>${lockedOverlay("silver","Posting Time Analysis")}</div>`:""}`,
+
     videos:sortedVideos.map(v=>{
       const views=parseInt(v.statistics?.viewCount||0);
       const likes=parseInt(v.statistics?.likeCount||0);
@@ -469,18 +483,105 @@ function renderDashboard() {
       const ec=parseFloat(eng)>5?"#10b981":parseFloat(eng)>2?"#f59e0b":"#94a3b8";
       return`<div class="video-card"><div style="display:flex;gap:10px;margin-bottom:10px"><img src="${v.snippet.thumbnails?.medium?.url||v.snippet.thumbnails?.default?.url||""}" class="video-thumb" onerror="this.style.display='none'"/><div style="flex:1"><div style="font-size:12px;font-weight:700;line-height:1.3;margin-bottom:3px">${v.snippet.title}</div><div style="font-size:10px;color:#94a3b8">${fmtDate(v.snippet.publishedAt)} · ${fmtDur(v.contentDetails?.duration)}</div></div></div><div class="stat-grid"><div class="stat-box"><div class="stat-val" style="color:#3b82f6">${fmt(views)}</div><div class="stat-lbl">Views</div></div><div class="stat-box"><div class="stat-val" style="color:#10b981">${fmt(likes)}</div><div class="stat-lbl">Likes</div></div><div class="stat-box"><div class="stat-val" style="color:#f59e0b">${fmt(comms)}</div><div class="stat-lbl">Cmts</div></div><div class="stat-box"><div class="stat-val" style="color:${ec}">${eng}%</div><div class="stat-lbl">Eng</div></div></div></div>`;
     }).join(""),
+
     comments:!comments.length?`<div class="empty"><div class="empty-icon">💬</div><div class="empty-title">No comments loaded</div><div class="empty-text">Fetch your comments to view them and run AI analysis.</div><button class="btn" onclick="fetchComments()" ${busy?"disabled":""}>Fetch comments →</button></div>`:`
       <div class="card" style="display:flex;justify-content:space-between;align-items:center">
         <div><div style="font-size:13px;font-weight:700">${comments.length} comments</div><div style="font-size:11px;color:#64748b">Across ${videos.length} videos</div></div>
         ${!sentiment?`<button class="btn" onclick="runSentiment()" ${busy?"disabled":""}>Run AI →</button>`:""}
       </div>
       ${comments.slice(0,50).map(cm=>`<div class="comment-card"><div style="font-size:11px;font-weight:700;color:#3b82f6;margin-bottom:4px">${cm.author}</div><div style="font-size:12px;color:#475569;line-height:1.5;margin-bottom:4px">${cm.text}</div><div style="font-size:10px;color:#94a3b8">${(cm.videoTitle||"").slice(0,50)}</div></div>`).join("")}`,
-    sentiment:!sentiment?`<div class="empty"><div class="empty-icon">🤖</div><div class="empty-title">AI Sentiment Analysis</div><div class="empty-text">${comments.length?`${comments.length} comments ready.`:"Fetch comments first."}</div><button class="btn" onclick="${comments.length?"runSentiment()":"fetchComments()"}" ${busy?"disabled":""}>${busy?(comments.length?"Analysing...":"Fetching..."):comments.length?"Run AI analysis →":"Fetch comments first →"}</button></div>`:`
-      <div class="card"><div class="card-title">Overall Sentiment</div><div class="sentiment-bars">${[{l:"Positive",p:sentiment.positive,c:"#10b981"},{l:"Neutral",p:sentiment.neutral,c:"#f59e0b"},{l:"Negative",p:sentiment.negative,c:"#ef4444"}].map(s=>`<div class="sentiment-bar"><div class="sentiment-pct" style="color:${s.c}">${s.p}%</div><div class="sentiment-label">${s.l}</div><div class="progress"><div class="progress-fill" style="width:${s.p}%;background:${s.c}"></div></div></div>`).join("")}</div></div>
-      ${(sentiment.themes||[]).map(th=>{const tc=th.sentiment==="positive"?"#10b981":th.sentiment==="negative"?"#ef4444":"#f59e0b";return`<div class="theme-card"><div class="theme-header"><div style="font-size:13px;font-weight:700">${th.theme}</div><span class="pill" style="background:${tc}22;color:${tc}">${th.sentiment} · ${th.count}</span></div>${(th.examples||[]).map(ex=>`<div class="quote">"${ex}"</div>`).join("")}</div>`;}).join("")}
-      <div class="dark-card"><div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#3b82f6;margin-bottom:10px">🤖 What your comments are telling you</div><p style="color:#cbd5e1;font-size:13px;line-height:1.85;margin-bottom:16px">${sentiment.summary}</p>${sentiment.quickWins?.length?`<div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#f59e0b;margin-bottom:10px">⚡ Quick wins</div>${sentiment.quickWins.map(w=>`<div class="quick-win"><span style="color:#10b981;font-weight:800;flex-shrink:0">→</span><p style="font-size:12px;color:#94a3b8;line-height:1.65;margin:0">${w}</p></div>`).join("")}`:""}</div>
+
+    sentiment:!sentiment?`
+      <div class="empty">
+        <div class="empty-icon">🤖</div>
+        <div class="empty-title">AI Sentiment Analysis</div>
+        <div class="empty-text">${comments.length?`${comments.length} comments ready.`:"Fetch comments first."}</div>
+        <button class="btn" onclick="${comments.length?"runSentiment()":"fetchComments()"}" ${busy?"disabled":""}>
+          ${busy?(comments.length?"Analysing...":"Fetching..."):comments.length?"Run AI analysis →":"Fetch comments first →"}
+        </button>
+      </div>`:`
+
+      ${sentiment.pipelineStats?`
+      <div class="dark-card">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#3b82f6;margin-bottom:10px">🔬 Pipeline Report</div>
+        <div class="pipeline-grid">
+          <div class="pipeline-stat"><div class="pipeline-val" style="color:#10b981">${sentiment.pipelineStats.afterSpamFilter}</div><div class="pipeline-lbl">Comments analysed</div></div>
+          <div class="pipeline-stat"><div class="pipeline-val" style="color:#ef4444">${sentiment.pipelineStats.spamRemoved}</div><div class="pipeline-lbl">Spam removed</div></div>
+          <div class="pipeline-stat"><div class="pipeline-val" style="color:#3b82f6">${sentiment.pipelineStats.translated}</div><div class="pipeline-lbl">Translated</div></div>
+          <div class="pipeline-stat"><div class="pipeline-val" style="color:#f59e0b">${sentiment.pipelineStats.total}</div><div class="pipeline-lbl">Total fetched</div></div>
+        </div>
+      </div>`:""}
+
+      ${sentiment.mostLiked?`
+      <div class="card" style="border-left:4px solid #f59e0b">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#f59e0b;margin-bottom:8px">⭐ Most Liked Comment</div>
+        <div style="font-size:13px;color:#0f172a;font-style:italic;margin-bottom:8px">"${sentiment.mostLiked.text}"</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:11px;font-weight:700;color:#3b82f6">${sentiment.mostLiked.author}</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-size:12px">👍</span>
+            <span style="font-size:12px;font-weight:700;color:#f59e0b">${sentiment.mostLiked.likes.toLocaleString()} likes</span>
+          </div>
+        </div>
+        <div style="font-size:10px;color:#94a3b8;margin-top:4px">${(sentiment.mostLiked.videoTitle||"").slice(0,50)}</div>
+      </div>`:""}
+
+      <div class="card">
+        <div class="card-title">Overall Sentiment</div>
+        <div class="sentiment-bars">
+          ${[{l:"Positive",p:sentiment.positive,c:"#10b981"},{l:"Neutral",p:sentiment.neutral,c:"#f59e0b"},{l:"Negative",p:sentiment.negative,c:"#ef4444"}].map(s=>`
+            <div class="sentiment-bar">
+              <div class="sentiment-pct" style="color:${s.c}">${s.p}%</div>
+              <div class="sentiment-label">${s.l}</div>
+              <div class="progress"><div class="progress-fill" style="width:${s.p}%;background:${s.c}"></div></div>
+            </div>`).join("")}
+        </div>
+      </div>
+
+      ${sentiment.audiencePersonality?`
+      <div class="card" style="border-left:4px solid #8b5cf6">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#8b5cf6;margin-bottom:8px">👥 Audience Personality</div>
+        <p style="font-size:13px;color:#475569;line-height:1.7;margin:0">${sentiment.audiencePersonality}</p>
+      </div>`:""}
+
+      ${sentiment.contentStrengths?.length||sentiment.contentWeaknesses?.length?`
+      <div class="sw-grid">
+        ${sentiment.contentStrengths?.length?`
+        <div class="sw-card" style="border-left:4px solid #10b981">
+          <div class="sw-title" style="color:#10b981">✅ Strengths</div>
+          ${sentiment.contentStrengths.map(s=>`<div class="sw-item">${s}</div>`).join("")}
+        </div>`:""}
+        ${sentiment.contentWeaknesses?.length?`
+        <div class="sw-card" style="border-left:4px solid #ef4444">
+          <div class="sw-title" style="color:#ef4444">⚠️ Weaknesses</div>
+          ${sentiment.contentWeaknesses.map(s=>`<div class="sw-item">${s}</div>`).join("")}
+        </div>`:""}
+      </div>`:""}
+
+      ${(sentiment.themes||[]).map(th=>{
+        const tc=th.sentiment==="positive"?"#10b981":th.sentiment==="negative"?"#ef4444":"#f59e0b";
+        return`<div class="theme-card">
+          <div class="theme-header">
+            <div style="font-size:13px;font-weight:700">${th.theme}</div>
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+              ${th.weight?`<span style="background:#0f172a;color:#94a3b8;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700">weight ${th.weight}/10</span>`:""}
+              <span class="pill" style="background:${tc}22;color:${tc}">${th.sentiment} · ${th.count}</span>
+            </div>
+          </div>
+          ${(th.examples||[]).map(ex=>`<div class="quote">"${ex}"</div>`).join("")}
+        </div>`;
+      }).join("")}
+
+      <div class="dark-card">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#3b82f6;margin-bottom:10px">🤖 What your comments are telling you</div>
+        <p style="color:#cbd5e1;font-size:13px;line-height:1.85;margin-bottom:16px">${sentiment.summary}</p>
+        ${sentiment.quickWins?.length?`
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#f59e0b;margin-bottom:10px">⚡ Quick wins</div>
+          ${sentiment.quickWins.map(w=>`<div class="quick-win"><span style="color:#10b981;font-weight:800;flex-shrink:0">→</span><p style="font-size:12px;color:#94a3b8;line-height:1.65;margin:0">${w}</p></div>`).join("")}`:""}
+      </div>
       ${isLocked("silver")?`<div class="locked-card" style="height:100px"><div class="card-title">Sentiment over time</div>${lockedOverlay("silver","Sentiment Trends")}</div>`:""}`,
   };
+
   document.getElementById("app").innerHTML=`
     <div style="min-height:100vh;background:#f1f5f9">
       <div class="topbar">

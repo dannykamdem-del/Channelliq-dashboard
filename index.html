@@ -228,6 +228,26 @@ body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; 
 .goal-response-text { font-size: 13px; color: #cbd5e1; line-height: 1.75; }
 @keyframes fadeSlide { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 
+/* SETTINGS PANEL */
+.settings-overlay { position:fixed;inset:0;z-index:300;background:rgba(15,23,42,0.7);display:none; }
+.settings-overlay.open { display:block; }
+.settings-panel { position:fixed;top:0;right:0;bottom:0;width:min(320px,100vw);background:#0f172a;border-left:1.5px solid #1e293b;z-index:301;overflow-y:auto;transform:translateX(100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); }
+.settings-panel.open { transform:translateX(0); }
+.settings-header { padding:20px 18px 16px;border-bottom:1px solid #1e293b;display:flex;align-items:center;justify-content:space-between; }
+.settings-title { font-size:15px;font-weight:700;color:#f1f5f9; }
+.settings-close { background:#1e293b;border:none;color:#64748b;border-radius:8px;padding:5px 10px;font-size:13px;cursor:pointer;font-family:inherit; }
+.settings-section { padding:16px 18px;border-bottom:1px solid #1e293b; }
+.settings-section-title { font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#64748b;margin-bottom:12px; }
+.settings-row { display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #1e293b08; }
+.settings-row:last-child { border-bottom:none; }
+.settings-row-label { font-size:13px;color:#cbd5e1; }
+.settings-row-sub { font-size:11px;color:#475569;margin-top:2px; }
+.settings-btn { padding:7px 14px;border:1.5px solid #334155;background:transparent;color:#94a3b8;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s; }
+.settings-btn:hover { border-color:#3b82f6;color:#3b82f6; }
+.settings-btn-danger { border-color:#334155;color:#ef4444; }
+.settings-btn-danger:hover { border-color:#ef4444; }
+.settings-icon-btn { background:#1e293b;border:none;color:#94a3b8;width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;flex-shrink:0; }
+
 /* Video selector for Q4 */
 .video-select-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; max-height: 340px; overflow-y: auto; }
 .video-select-item { display: flex; align-items: center; gap: 12px; background: #1e293b; border: 1.5px solid #334155; border-radius: 12px; padding: 10px 12px; cursor: pointer; transition: all 0.15s; }
@@ -264,6 +284,50 @@ body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; 
   </div>
   <button class="goal-prompt-btn" onclick="openGoalFlow()">Set my goals →</button>
   <button class="goal-prompt-dismiss" onclick="dismissGoalPrompt()">×</button>
+</div>
+
+<!-- SETTINGS PANEL -->
+<div class="settings-overlay" id="settingsOverlay" onclick="closeSettings()"></div>
+<div class="settings-panel" id="settingsPanel">
+  <div class="settings-header">
+    <span class="settings-title">⚙️ Preferences</span>
+    <button class="settings-close" onclick="closeSettings()">Done</button>
+  </div>
+  <div class="settings-section">
+    <div class="settings-section-title">Your goals</div>
+    <div class="settings-row">
+      <div><div class="settings-row-label">Creative goals</div><div class="settings-row-sub" id="settingsGoalSub">Not set yet</div></div>
+      <button class="settings-btn" onclick="closeSettings();openGoalFlow()">Edit →</button>
+    </div>
+  </div>
+  <div class="settings-section">
+    <div class="settings-section-title">Channel</div>
+    <div class="settings-row">
+      <div><div class="settings-row-label">Connected channel</div><div class="settings-row-sub" id="settingsChannelSub">—</div></div>
+      <button class="settings-btn" onclick="changeChannel()">Change</button>
+    </div>
+    <div class="settings-row">
+      <div><div class="settings-row-label">Stay signed in</div><div class="settings-row-sub" id="settingsRememberSub">—</div></div>
+      <button class="settings-btn" id="settingsRememberBtn" onclick="toggleRememberMe()">Toggle</button>
+    </div>
+  </div>
+  <div class="settings-section">
+    <div class="settings-section-title">Data</div>
+    <div class="settings-row">
+      <div><div class="settings-row-label">Clear cached data</div><div class="settings-row-sub">Reload channel and video data</div></div>
+      <button class="settings-btn" onclick="clearCache()">Clear</button>
+    </div>
+    <div class="settings-row">
+      <div><div class="settings-row-label">Reset all preferences</div><div class="settings-row-sub">Clear goals, channel and sign out</div></div>
+      <button class="settings-btn settings-btn-danger" onclick="resetAll()">Reset</button>
+    </div>
+  </div>
+  <div class="settings-section">
+    <div class="settings-row">
+      <div><div class="settings-row-label">Sign out</div><div class="settings-row-sub">You can sign back in any time</div></div>
+      <button class="settings-btn settings-btn-danger" onclick="closeSettings();signOut()">Sign out</button>
+    </div>
+  </div>
 </div>
 
 <!-- GOAL FLOW OVERLAY -->
@@ -624,38 +688,107 @@ async function loadGoals() {
   } catch(_) {}
 }
 
+// ── SETTINGS PANEL ───────────────────────────────────────────────────────────
+function openSettings() {
+  // Update settings panel content
+  const goals = state.goals;
+  const goalSub = document.getElementById("settingsGoalSub");
+  const channelSub = document.getElementById("settingsChannelSub");
+  const rememberSub = document.getElementById("settingsRememberSub");
+  const rememberBtn = document.getElementById("settingsRememberBtn");
+  const isRemembered = localStorage.getItem("channeliq_remember")==="true";
+
+  if (goalSub) goalSub.textContent = goals?.goal?.length ? (Array.isArray(goals.goal) ? goals.goal.map(v=>GOAL_OPTIONS.find(o=>o.value===v)?.label||v).join(", ") : goals.goal) : "Not set yet";
+  if (channelSub) channelSub.textContent = state.channel?.snippet?.title || state.handle || "None";
+  if (rememberSub) rememberSub.textContent = isRemembered ? "On — auto-loading on return visits" : "Off — will ask to sign in each time";
+  if (rememberBtn) rememberBtn.textContent = isRemembered ? "Turn off" : "Turn on";
+
+  document.getElementById("settingsOverlay").classList.add("open");
+  document.getElementById("settingsPanel").classList.add("open");
+}
+
+function closeSettings() {
+  document.getElementById("settingsOverlay").classList.remove("open");
+  document.getElementById("settingsPanel").classList.remove("open");
+}
+
+function toggleRememberMe() {
+  const current = localStorage.getItem("channeliq_remember")==="true";
+  localStorage.setItem("channeliq_remember", current ? "false" : "true");
+  if (!current && state.handle) localStorage.setItem("channeliq_handle", state.handle);
+  openSettings(); // refresh display
+}
+
+function changeChannel() {
+  closeSettings();
+  state.channel=null; state.videos=[]; state.comments=[];
+  state.sentiment=null; state.screen="onboard";
+  localStorage.removeItem("channeliq_handle");
+  render();
+}
+
+function clearCache() {
+  state.videos=[]; state.comments=[]; state.sentiment=null;
+  closeSettings();
+  if (state.handle) loadChannel(state.handle);
+}
+
+function resetAll() {
+  if (!confirm("This will clear your goals, cached data and sign you out. Are you sure?")) return;
+  closeSettings();
+  localStorage.removeItem("channeliq_handle");
+  localStorage.removeItem("channeliq_remember");
+  signOut();
+}
+
 // ── INIT ──────────────────────────────────────────────────────────────────────
 async function init() {
-  const { data:{ session } } = await sb.auth.getSession();
-  const saved = localStorage.getItem("channeliq_handle");
-  if (session) {
-    state.user=session.user;
-    await loadGoals();
-    if (saved) { state.handle=saved; state.screen="loading"; render(); await loadChannel(saved); }
-    else { state.screen="onboard"; render(); }
-  } else {
-    if (saved) state.handle=saved;
-    state.screen="onboard"; render();
-  }
+  const loadingTimeout = setTimeout(()=>{
+    if (state.screen==="loading") { state.screen="onboard"; state.error="Connection timed out. Please try again."; render(); }
+  }, 8000);
+  try {
+    const { data:{ session } } = await sb.auth.getSession();
+    const savedHandle = localStorage.getItem("channeliq_handle");
+    const rememberMe = localStorage.getItem("channeliq_remember")==="true";
+    if (session) {
+      state.user=session.user;
+      await loadGoals();
+      if (savedHandle && rememberMe) {
+        state.handle=savedHandle; state.screen="loading"; render();
+        await loadChannel(savedHandle);
+      } else {
+        if (savedHandle) state.handle=savedHandle;
+        state.screen="onboard"; render();
+      }
+    } else {
+      if (savedHandle) state.handle=savedHandle;
+      state.screen="onboard"; render();
+    }
+  } catch(e) { state.screen="onboard"; render(); }
+  finally { clearTimeout(loadingTimeout); }
+
   sb.auth.onAuthStateChange(async (event, session) => {
     if (event==="SIGNED_IN" && session) {
       state.user=session.user;
       await loadGoals();
       const h=localStorage.getItem("channeliq_handle");
-      if (state.backgroundData && h) {
+      const remember=localStorage.getItem("channeliq_remember")==="true";
+      if (state.backgroundData && h && remember) {
         state.channel=state.backgroundData.channel;
         state.videos=state.backgroundData.videos;
         state.tier=getTier(parseInt(state.channel.statistics?.subscriberCount||0));
         state.status=`${state.videos.length} videos loaded ✓`;
         state.screen="dashboard"; state.busy=false; render();
-      } else if (h) { state.handle=h; await loadChannel(h); }
-      else { state.screen="onboard"; render(); }
+      } else if (h && remember) { state.handle=h; await loadChannel(h); }
+      else { if (h) state.handle=h; state.screen="onboard"; render(); }
     }
     if (event==="SIGNED_OUT") {
       state.user=null; state.channel=null; state.videos=[];
       state.comments=[]; state.sentiment=null; state.goals=null;
       state.screen="onboard";
-      localStorage.removeItem("channeliq_handle"); render();
+      localStorage.removeItem("channeliq_handle");
+      localStorage.removeItem("channeliq_remember");
+      render();
     }
   });
 }
@@ -683,8 +816,9 @@ async function fetchBackground() {
   } catch(_) {}
 }
 
-async function signInWithGoogle() {
+async function signInWithGoogle(remember) {
   if (state.handle) localStorage.setItem("channeliq_handle", state.handle);
+  localStorage.setItem("channeliq_remember", remember ? "true" : "false");
   await sb.auth.signInWithOAuth({ provider:"google", options:{ redirectTo:"https://ytanalyst.netlify.app" } });
 }
 
@@ -692,6 +826,7 @@ async function signOut() { await sb.auth.signOut(); }
 
 async function loadChannel(handle) {
   state.status="Loading your channel..."; state.screen="loading"; render();
+  const t = setTimeout(()=>{ if(state.screen==="loading"){ state.error="Could not load channel. Please check your handle and try again."; state.screen="onboard"; render(); } }, 10000);
   try {
     const r=await fetch(`${SERVER}/lookup?handle=${encodeURIComponent(handle)}`);
     const d=await r.json();
@@ -703,7 +838,10 @@ async function loadChannel(handle) {
     state.status=`${state.videos.length} videos loaded ✓`;
     state.screen="dashboard"; state.busy=false; render();
     scheduleGoalPrompt();
-  } catch(e) { state.error=e.message; state.screen="onboard"; render(); }
+  } catch(e) {
+    state.error=e.message||"Connection failed. Please try again.";
+    state.screen="onboard"; render();
+  } finally { clearTimeout(t); }
 }
 
 async function fetchComments() {
@@ -890,7 +1028,9 @@ function renderTeaser() {
         <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#64748b;margin-bottom:8px">Your KPIs — sign in to unlock all</div>
         <div class="teaser-kpi-grid">${fakeKpis.map(k=>`<div class="teaser-kpi" style="border-left-color:${k.color}"><div class="teaser-kpi-label">${k.icon} ${k.label}</div><div class="teaser-kpi-value ${k.blur?"blurred":""}" style="color:${k.color}">${k.value}</div></div>`).join("")}</div>
         <div class="unlock-banner"><div style="font-size:28px;margin-bottom:8px">🔓</div><div class="unlock-title">Your insights are ready</div><div class="unlock-sub">Sign in with Google to unlock your full dashboard — free for ${getTierLabel(state.tier)} channels.</div>
-          <button class="google-btn" onclick="signInWithGoogle()"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>Continue with Google</button>
+          <button class="google-btn" onclick="signInWithGoogle(true)"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>Sign in &amp; remember me</button>
+          <button class="google-btn" onclick="signInWithGoogle(false)" style="background:#1e293b;color:#94a3b8;margin-top:0"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>Sign in this time only</button>
+          <div style="font-size:11px;color:#475569;text-align:center;margin-top:6px">Remember me keeps you signed in on this device</div>
         </div>
         <div class="teaser-preview" style="min-height:160px"><div class="teaser-preview-label">🤖 AI Sentiment Analysis</div><div class="blurred" style="color:#cbd5e1;font-size:13px;line-height:1.8">Your audience responds most positively to your tutorial content and production quality. Comment themes show strong demand for more in-depth guides.</div><div class="teaser-preview-overlay"><div class="teaser-preview-lock">🔒 Sign in to see your real sentiment analysis</div></div></div>
         <div class="teaser-preview" style="min-height:120px"><div class="teaser-preview-label">📈 Growth Recommendations</div><div class="blurred" style="color:#cbd5e1;font-size:13px;line-height:1.8">Post on Tuesday and Thursday between 6-8pm GMT to maximise your audience reach. Increasing to 2 videos per week could accelerate subscriber growth by an estimated 40%.</div><div class="teaser-preview-overlay"><div class="teaser-preview-lock">🔒 Sign in to unlock your growth plan</div></div></div>
@@ -993,6 +1133,7 @@ function renderDashboard() {
           <span class="${getTierBadgeClass(tier)}">${getTierLabel(tier)}</span>
           ${goals?.goal?`<div class="goals-indicator" onclick="openGoalFlow()"><div class="goals-indicator-dot"></div><span class="goals-indicator-text">Goals set</span></div>`:`<div class="goals-indicator" onclick="openGoalFlow()" style="border-color:#334155;background:#1e293b"><div class="goals-indicator-dot" style="background:#64748b"></div><span class="goals-indicator-text" style="color:#64748b">Set goals</span></div>`}
           ${status?`<span class="status-pill">${status}</span>`:""}
+          <button class="settings-icon-btn" onclick="openSettings()" title="Preferences">⚙️</button>
           <button class="signout-btn" onclick="signOut()">Sign out</button>
         </div>
       </div>
@@ -1003,24 +1144,4 @@ function renderDashboard() {
           ${!comments.length&&!busy?`<button class="btn" onclick="fetchComments()">Fetch comments &amp; run AI sentiment →</button>`:""}
           ${busy?`<span style="font-size:13px;color:#94a3b8">${status}</span>`:""}
           ${comments.length&&!busy?`<span style="font-size:13px;color:#10b981;font-weight:600">✓ ${comments.length} comments${sentiment?" · Sentiment ready":""}</span>`:""}
-        </div>
-        <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#64748b;margin-bottom:8px">KPIs</div>
-        <div class="kpi-grid">${kpis.map(k=>`<div class="kpi-card" style="border-left:4px solid ${k.color}"><div class="kpi-label">${k.icon} ${k.label}</div><div class="kpi-value" style="color:${k.color}">${k.value}</div><div class="kpi-note">${k.note}</div></div>`).join("")}</div>
-        <div class="tabs">${["overview","videos","comments","sentiment","advanced"].map(t=>`<button class="tab ${tab===t?"active":""}" onclick="setTab('${t}')">${t==="advanced"?"📊 advanced":t}${t==="sentiment"&&sentiment?" ✓":""}</button>`).join("")}</div>
-        <div>${tabContent[tab]||""}</div>
-      </div>
-    </div>`;
-}
-
-function render() {
-  if (state.screen==="loading") { document.getElementById("app").innerHTML=`<div class="loading"><div style="font-size:40px">📡</div><div class="loading-text">ChannelIQ</div><div class="loading-sub">${state.status||"Loading..."}</div></div>`; return; }
-  if (state.screen==="onboard") { renderOnboard(); return; }
-  if (state.screen==="teaser") { renderTeaser(); return; }
-  if (state.screen==="videodetail") { renderVideoDetail(); return; }
-  if (state.screen==="dashboard") { renderDashboard(); return; }
-}
-
-init();
-</script>
-</body>
-</html>
+        </di

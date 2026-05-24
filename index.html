@@ -88,11 +88,13 @@ body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; 
 .tabs { display: flex; gap: 3px; background: #e2e8f0; padding: 3px; border-radius: 10px; margin-bottom: 16px; }
 .tab { flex: 1; padding: 7px 2px; border-radius: 8px; border: none; cursor: pointer; font-family: inherit; font-size: 11px; font-weight: 600; background: transparent; color: #64748b; text-transform: capitalize; white-space: nowrap; }
 .tab.active { background: white; color: #0f172a; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-.video-card { background: white; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 14px; margin-bottom: 10px; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
+.video-card { background: white; border: 1.5px solid #e2e8f0; border-radius: 14px; overflow: hidden; margin-bottom: 12px; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
 .video-card:hover { border-color: #3b82f6; box-shadow: 0 2px 8px rgba(59,130,246,0.15); }
-.video-card.selected { border-color: #3b82f6; background: #eff6ff; }
-.video-thumb { width: 88px; height: 50px; object-fit: cover; border-radius: 6px; flex-shrink: 0; }
-.stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; margin-top: 10px; }
+.video-thumb-large { width: 100%; height: 180px; object-fit: cover; display: block; background: #e2e8f0; }
+.video-card-body { padding: 12px 14px 14px; }
+.video-card-title { font-size: 13px; font-weight: 700; line-height: 1.4; margin-bottom: 4px; color: #0f172a; }
+.video-card-meta { font-size: 10px; color: #94a3b8; margin-bottom: 10px; }
+.stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; }
 .stat-box { background: #f8fafc; border-radius: 8px; padding: 7px 4px; text-align: center; }
 .stat-val { font-size: 13px; font-weight: 800; font-family: monospace; }
 .stat-lbl { font-size: 9px; color: #94a3b8; margin-top: 2px; }
@@ -115,8 +117,6 @@ body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; 
 .insight-body { font-size: 11px; color: #94a3b8; line-height: 1.6; }
 .btn { padding: 11px 22px; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; color: white; background: #3b82f6; }
 .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-.btn-sm { padding: 7px 14px; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; color: white; background: #3b82f6; }
-.btn-ghost { padding: 7px 14px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; color: #64748b; background: white; }
 .empty { text-align: center; padding: 36px 20px; }
 .empty-icon { font-size: 32px; margin-bottom: 10px; }
 .empty-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
@@ -135,11 +135,16 @@ body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; 
 .sw-card { background: white; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 14px; }
 .sw-title { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
 .sw-item { font-size: 12px; color: #475569; padding: 5px 0; border-bottom: 1px solid #f1f5f9; line-height: 1.5; }
-.video-detail-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
-.back-btn { background: #1e293b; color: #94a3b8; border: none; border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; flex-shrink: 0; }
+.emoji-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+.emoji-item { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 10px 14px; text-align: center; min-width: 60px; }
+.emoji-char { font-size: 24px; line-height: 1; margin-bottom: 4px; }
+.emoji-count { font-size: 12px; font-weight: 700; color: #0f172a; font-family: monospace; }
+.emoji-lbl { font-size: 9px; color: #94a3b8; margin-top: 1px; }
 .collapsible-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 4px 0; }
 .collapsible-content { display: none; margin-top: 12px; }
 .collapsible-content.open { display: block; }
+.video-detail-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.back-btn { background: #1e293b; color: #94a3b8; border: none; border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; flex-shrink: 0; }
 </style>
 </head>
 <body>
@@ -176,16 +181,16 @@ const fmtDate = iso=>new Date(iso).toLocaleDateString("en-GB",{day:"numeric",mon
 const getTier = subs=>subs>=100000?"gold":subs>=10000?"silver":"bronze";
 const getTierLabel = t=>t==="gold"?"🥇 Gold":t==="silver"?"🥈 Silver":"🥉 Bronze";
 const getTierBadgeClass = t=>`tier-badge tier-badge-${t}`;
-const isLocked = required=>{
-  const order=["bronze","silver","gold"];
-  return order.indexOf(state.tier)<order.indexOf(required);
-};
+const isLocked = required=>{ const o=["bronze","silver","gold"]; return o.indexOf(state.tier)<o.indexOf(required); };
+
+// Strip hashtags and clean title
+const cleanTitle = t => t.replace(/#\S+/g,"").replace(/\s+/g," ").trim();
 
 async function init() {
   const { data:{ session } } = await sb.auth.getSession();
   const saved = localStorage.getItem("channeliq_handle");
   if (session) {
-    state.user = session.user;
+    state.user=session.user;
     if (saved) { state.handle=saved; state.screen="loading"; render(); await loadChannel(saved); }
     else { state.screen="onboard"; render(); }
   } else {
@@ -296,7 +301,7 @@ async function runSentiment(data) {
 async function openVideo(video) {
   state.selectedVideo=video; state.videoSentiment=null; state.videoComments=[];
   state.screen="videodetail"; render();
-  state.busy=true; state.status=`Loading comments for "${video.snippet.title.slice(0,30)}..."`; render();
+  state.busy=true; state.status=`Loading comments...`; render();
   try {
     const r=await fetch(`${SERVER}/comments?videoId=${video.id}`);
     const d=await r.json();
@@ -322,6 +327,28 @@ async function openVideo(video) {
 function closeVideo() { state.screen="dashboard"; state.selectedVideo=null; state.videoSentiment=null; state.videoComments=[]; render(); }
 function setTab(t) { state.tab=t; render(); }
 function toggleSpam() { state.spamVisible=!state.spamVisible; render(); }
+
+function emojiBlock(emojiStats) {
+  if (!emojiStats||!emojiStats.total) return "";
+  return `
+    <div class="card">
+      <div class="card-title">😄 Emoji reactions — ${emojiStats.total.toLocaleString()} total</div>
+      <div class="emoji-grid">
+        ${emojiStats.top.map(e=>`
+          <div class="emoji-item">
+            <div class="emoji-char">${e.emoji}</div>
+            <div class="emoji-count">${e.count.toLocaleString()}</div>
+            <div class="emoji-lbl">uses</div>
+          </div>`).join("")}
+        ${emojiStats.otherCount>0?`
+          <div class="emoji-item">
+            <div class="emoji-char" style="font-size:16px;padding-top:4px">+more</div>
+            <div class="emoji-count">${emojiStats.otherCount.toLocaleString()}</div>
+            <div class="emoji-lbl">other</div>
+          </div>`:""}
+      </div>
+    </div>`;
+}
 
 function sentimentBlock(s) {
   if (!s) return "";
@@ -358,6 +385,8 @@ function sentimentBlock(s) {
           </div>`).join("")}
       </div>
     </div>
+
+    ${emojiBlock(s.emojiStats)}
 
     ${s.audiencePersonality?`
     <div class="card" style="border-left:4px solid #8b5cf6">
@@ -396,16 +425,15 @@ function sentimentBlock(s) {
     ${s.spamSample?.length?`
     <div class="card">
       <div class="collapsible-header" onclick="toggleSpam()">
-        <div style="font-size:13px;font-weight:700">🚫 Filtered spam (${s.spamSample.length})</div>
+        <div style="font-size:13px;font-weight:700">🚫 Filtered comments (${s.spamSample.length})</div>
         <span style="font-size:11px;color:#64748b">${state.spamVisible?"Hide ▲":"Show ▼"}</span>
       </div>
       <div class="collapsible-content ${state.spamVisible?"open":""}">
-        <p style="font-size:11px;color:#64748b;margin-bottom:10px;line-height:1.5">These comments were removed before analysis. Review them to check if any valid comments were incorrectly filtered.</p>
+        <p style="font-size:11px;color:#64748b;margin-bottom:10px;line-height:1.5">Review these to check if any valid comments were incorrectly filtered.</p>
         ${s.spamSample.map(c=>`
           <div class="spam-card">
-            <div class="spam-reason">${c.spamReason||"Spam"}</div>
+            <div class="spam-reason">${c.spamReason||"Filtered"}</div>
             <div style="font-size:12px;color:#92400e;line-height:1.5">${c.text||"(empty)"}</div>
-            <div style="font-size:10px;color:#b45309;margin-top:4px">${(c.videoTitle||"").slice(0,40)}</div>
           </div>`).join("")}
       </div>
     </div>`:""}`;
@@ -473,12 +501,12 @@ function renderTeaser() {
         </div>
         <div class="teaser-preview" style="min-height:160px">
           <div class="teaser-preview-label">🤖 AI Sentiment Analysis</div>
-          <div class="blurred" style="color:#cbd5e1;font-size:13px;line-height:1.8">Your audience responds most positively to your tutorial content and production quality. Comment themes show strong demand for more in-depth guides. Engagement spikes when you ask questions directly to viewers.</div>
+          <div class="blurred" style="color:#cbd5e1;font-size:13px;line-height:1.8">Your audience responds most positively to your tutorial content and production quality. Comment themes show strong demand for more in-depth guides.</div>
           <div class="teaser-preview-overlay"><div class="teaser-preview-lock">🔒 Sign in to see your real sentiment analysis</div></div>
         </div>
         <div class="teaser-preview" style="min-height:120px">
           <div class="teaser-preview-label">📈 Growth Recommendations</div>
-          <div class="blurred" style="color:#cbd5e1;font-size:13px;line-height:1.8">Post on Tuesday and Thursday between 6-8pm GMT to maximise your audience reach. Your current upload cadence is below optimal. Increasing to 2 videos per week could accelerate subscriber growth by an estimated 40%.</div>
+          <div class="blurred" style="color:#cbd5e1;font-size:13px;line-height:1.8">Post on Tuesday and Thursday between 6-8pm GMT to maximise your audience reach. Increasing to 2 videos per week could accelerate subscriber growth by an estimated 40%.</div>
           <div class="teaser-preview-overlay"><div class="teaser-preview-lock">🔒 Sign in to unlock your growth plan</div></div>
         </div>
       </div>
@@ -493,8 +521,7 @@ function renderVideoDetail() {
   const comms=parseInt(v.statistics?.commentCount||0);
   const eng=views?((likes+comms)/views*100).toFixed(1):"0.0";
   const ec=parseFloat(eng)>5?"#10b981":parseFloat(eng)>2?"#f59e0b":"#94a3b8";
-  const snip=state.channel?.snippet||{};
-  const subs=parseInt(state.channel?.statistics?.subscriberCount||0);
+  const thumb=v.snippet.thumbnails?.maxres?.url||v.snippet.thumbnails?.high?.url||v.snippet.thumbnails?.medium?.url||v.snippet.thumbnails?.default?.url||"";
 
   document.getElementById("app").innerHTML=`
     <div style="min-height:100vh;background:#f1f5f9">
@@ -508,38 +535,19 @@ function renderVideoDetail() {
       <div class="body">
         <div class="video-detail-header">
           <button class="back-btn" onclick="closeVideo()">← Back</button>
-          <div style="font-size:13px;font-weight:700;color:#0f172a;line-height:1.3">${v.snippet.title}</div>
+          <div style="font-size:13px;font-weight:700;color:#0f172a;line-height:1.3">${cleanTitle(v.snippet.title)}</div>
         </div>
-
-        <img src="${v.snippet.thumbnails?.medium?.url||v.snippet.thumbnails?.default?.url||""}" style="width:100%;border-radius:12px;margin-bottom:12px;object-fit:cover;max-height:180px" onerror="this.style.display='none'"/>
-
+        ${thumb?`<img src="${thumb}" style="width:100%;border-radius:14px;margin-bottom:12px;object-fit:cover;max-height:200px;display:block" onerror="this.style.display='none'"/>`:""}
         <div style="font-size:10px;color:#94a3b8;margin-bottom:12px">${fmtDate(v.snippet.publishedAt)} · ${fmtDur(v.contentDetails?.duration)}</div>
-
         <div class="stat-grid" style="margin-bottom:16px">
           <div class="stat-box"><div class="stat-val" style="color:#3b82f6">${fmt(views)}</div><div class="stat-lbl">Views</div></div>
           <div class="stat-box"><div class="stat-val" style="color:#10b981">${fmt(likes)}</div><div class="stat-lbl">Likes</div></div>
           <div class="stat-box"><div class="stat-val" style="color:#f59e0b">${fmt(comms)}</div><div class="stat-lbl">Comments</div></div>
           <div class="stat-box"><div class="stat-val" style="color:${ec}">${eng}%</div><div class="stat-lbl">Engagement</div></div>
         </div>
-
         ${state.busy?`<div style="text-align:center;padding:40px 20px"><div style="font-size:28px;margin-bottom:10px">🤖</div><div style="font-size:14px;font-weight:600;color:#0f172a;margin-bottom:6px">Analysing comments...</div><div style="font-size:12px;color:#64748b">${state.status}</div></div>`:""}
-
-        ${!state.busy&&!state.videoSentiment&&state.videoComments.length===0?`
-        <div class="empty">
-          <div class="empty-icon">💬</div>
-          <div class="empty-title">No comments found</div>
-          <div class="empty-text">This video may have comments disabled or no comments yet.</div>
-        </div>`:""}
-
         ${!state.busy&&state.videoSentiment?sentimentBlock(state.videoSentiment):""}
-
-        ${!state.busy&&state.videoComments.length&&!state.videoSentiment?`
-        <div class="empty">
-          <div class="empty-icon">🤖</div>
-          <div class="empty-title">${state.videoComments.length} comments loaded</div>
-          <div class="empty-text">Sentiment analysis failed. Try again.</div>
-          <button class="btn" onclick="openVideo(state.selectedVideo)">Retry analysis</button>
-        </div>`:""}
+        ${!state.busy&&!state.videoSentiment&&state.videoComments.length===0?`<div class="empty"><div class="empty-icon">💬</div><div class="empty-title">No comments found</div><div class="empty-text">This video may have comments disabled.</div></div>`:""}
       </div>
     </div>`;
 }
@@ -575,7 +583,7 @@ function renderDashboard() {
           ${[...videos].sort((a,b)=>new Date(a.snippet.publishedAt)-new Date(b.snippet.publishedAt)).map((v,i,arr)=>{
             const views=parseInt(v.statistics?.viewCount||0);
             const h=Math.max((views/maxViews)*100,2);
-            return`<div class="bar-wrap"><div style="flex:1;display:flex;align-items:flex-end;width:100%"><div class="bar" style="height:${h}%;background:${i===arr.length-1?"#3b82f6":"#bfdbfe"}"></div></div><div class="bar-lbl">${v.snippet.title.slice(0,10)}</div></div>`;
+            return`<div class="bar-wrap"><div style="flex:1;display:flex;align-items:flex-end;width:100%"><div class="bar" style="height:${h}%;background:${i===arr.length-1?"#3b82f6":"#bfdbfe"}"></div></div><div class="bar-lbl">${cleanTitle(v.snippet.title).slice(0,10)}</div></div>`;
           }).join("")}
         </div>
       </div>
@@ -584,7 +592,7 @@ function renderDashboard() {
         ${[
           {t:"Foundation phase",b:`${vidCount} videos is the beginning. Every video trains the algorithm.`},
           {t:"Engagement beats views",b:"50 views and 10 comments beats 500 views and silence."},
-          {t:"Your blueprint",b:topVideo?`"${topVideo.snippet.title}" is your top performer. Study and repeat that formula.`:"Keep publishing — patterns will emerge."},
+          {t:"Your blueprint",b:topVideo?`"${cleanTitle(topVideo.snippet.title)}" is your top performer. Study and repeat that formula.`:"Keep publishing — patterns will emerge."},
           {t:"Run sentiment",b:"Tap 'Fetch comments' to get AI analysis of what your audience loves."},
         ].map(item=>`<div class="insight"><div class="insight-title">${item.t}</div><div class="insight-body">${item.b}</div></div>`).join("")}
       </div>
@@ -593,7 +601,7 @@ function renderDashboard() {
     videos:`
       <div class="card" style="margin-bottom:12px">
         <div style="font-size:13px;font-weight:700;margin-bottom:4px">Your videos</div>
-        <div style="font-size:11px;color:#64748b">Tap any video for a full breakdown and sentiment analysis</div>
+        <div style="font-size:11px;color:#64748b">Tap any video for a full breakdown and AI sentiment analysis</div>
       </div>
       ${sortedVideos.map(v=>{
         const views=parseInt(v.statistics?.viewCount||0);
@@ -601,20 +609,19 @@ function renderDashboard() {
         const comms=parseInt(v.statistics?.commentCount||0);
         const eng=views?((likes+comms)/views*100).toFixed(1):"0.0";
         const ec=parseFloat(eng)>5?"#10b981":parseFloat(eng)>2?"#f59e0b":"#94a3b8";
-        return`<div class="video-card" onclick="openVideo(${JSON.stringify(v).replace(/"/g,'&quot;')})">
-          <div style="display:flex;gap:10px;margin-bottom:10px">
-            <img src="${v.snippet.thumbnails?.medium?.url||v.snippet.thumbnails?.default?.url||""}" class="video-thumb" onerror="this.style.display='none'"/>
-            <div style="flex:1">
-              <div style="font-size:12px;font-weight:700;line-height:1.3;margin-bottom:3px">${v.snippet.title}</div>
-              <div style="font-size:10px;color:#94a3b8">${fmtDate(v.snippet.publishedAt)} · ${fmtDur(v.contentDetails?.duration)}</div>
+        const thumb=v.snippet.thumbnails?.maxres?.url||v.snippet.thumbnails?.high?.url||v.snippet.thumbnails?.medium?.url||v.snippet.thumbnails?.default?.url||"";
+        const safeV=encodeURIComponent(JSON.stringify(v));
+        return`<div class="video-card" onclick="openVideo(JSON.parse(decodeURIComponent('${safeV}')))">
+          ${thumb?`<img src="${thumb}" class="video-thumb-large" onerror="this.style.display='none'"/>`:""}
+          <div class="video-card-body">
+            <div class="video-card-title">${cleanTitle(v.snippet.title)}</div>
+            <div class="video-card-meta">${fmtDate(v.snippet.publishedAt)} · ${fmtDur(v.contentDetails?.duration)} · tap for sentiment →</div>
+            <div class="stat-grid">
+              <div class="stat-box"><div class="stat-val" style="color:#3b82f6">${fmt(views)}</div><div class="stat-lbl">Views</div></div>
+              <div class="stat-box"><div class="stat-val" style="color:#10b981">${fmt(likes)}</div><div class="stat-lbl">Likes</div></div>
+              <div class="stat-box"><div class="stat-val" style="color:#f59e0b">${fmt(comms)}</div><div class="stat-lbl">Cmts</div></div>
+              <div class="stat-box"><div class="stat-val" style="color:${ec}">${eng}%</div><div class="stat-lbl">Eng</div></div>
             </div>
-            <div style="font-size:16px;color:#94a3b8;flex-shrink:0">→</div>
-          </div>
-          <div class="stat-grid">
-            <div class="stat-box"><div class="stat-val" style="color:#3b82f6">${fmt(views)}</div><div class="stat-lbl">Views</div></div>
-            <div class="stat-box"><div class="stat-val" style="color:#10b981">${fmt(likes)}</div><div class="stat-lbl">Likes</div></div>
-            <div class="stat-box"><div class="stat-val" style="color:#f59e0b">${fmt(comms)}</div><div class="stat-lbl">Cmts</div></div>
-            <div class="stat-box"><div class="stat-val" style="color:${ec}">${eng}%</div><div class="stat-lbl">Eng</div></div>
           </div>
         </div>`;
       }).join("")}`,
@@ -624,7 +631,7 @@ function renderDashboard() {
         <div><div style="font-size:13px;font-weight:700">${comments.length} comments</div><div style="font-size:11px;color:#64748b">Across ${videos.length} videos</div></div>
         ${!sentiment?`<button class="btn" onclick="runSentiment()" ${busy?"disabled":""}>Run AI →</button>`:""}
       </div>
-      ${comments.slice(0,50).map(cm=>`<div class="comment-card"><div style="font-size:11px;font-weight:700;color:#3b82f6;margin-bottom:4px">${cm.author}</div><div style="font-size:12px;color:#475569;line-height:1.5;margin-bottom:4px">${cm.text}</div><div style="font-size:10px;color:#94a3b8">${(cm.videoTitle||"").slice(0,50)}</div></div>`).join("")}`,
+      ${comments.slice(0,50).map(cm=>`<div class="comment-card"><div style="font-size:11px;font-weight:700;color:#3b82f6;margin-bottom:4px">${cm.author}</div><div style="font-size:12px;color:#475569;line-height:1.5;margin-bottom:4px">${cm.text}</div><div style="font-size:10px;color:#94a3b8">${cleanTitle(cm.videoTitle||"").slice(0,50)}</div></div>`).join("")}`,
 
     sentiment:!sentiment?`<div class="empty"><div class="empty-icon">🤖</div><div class="empty-title">AI Sentiment Analysis</div><div class="empty-text">${comments.length?`${comments.length} comments ready.`:"Fetch comments first."}</div><button class="btn" onclick="${comments.length?"runSentiment()":"fetchComments()"}" ${busy?"disabled":""}>${busy?(comments.length?"Analysing...":"Fetching..."):comments.length?"Run AI analysis →":"Fetch comments first →"}</button></div>`:sentimentBlock(sentiment)+`${isLocked("silver")?`<div class="locked-card" style="height:100px"><div class="card-title">Sentiment over time</div>${lockedOverlay("silver","Sentiment Trends")}</div>`:""}`,
   };
@@ -643,7 +650,7 @@ function renderDashboard() {
       <div class="body">
         <div class="banner">
           <div class="banner-label">📡 ${snip.title} — ${getTierLabel(tier)} Tier</div>
-          <div class="banner-text">${vidCount} video${vidCount!==1?"s":""} · ${fmt(totViews)} total views · ${fmt(subs)} subscribers.${topVideo?` Top performer: "${topVideo.snippet.title}".`:""}${tier==="bronze"?" Upgrade to Silver to unlock advanced insights.":""}</div>
+          <div class="banner-text">${vidCount} video${vidCount!==1?"s":""} · ${fmt(totViews)} total views · ${fmt(subs)} subscribers.${topVideo?` Top performer: "${cleanTitle(topVideo.snippet.title)}".`:""}${tier==="bronze"?" Upgrade to Silver to unlock advanced insights.":""}</div>
           ${!comments.length&&!busy?`<button class="btn" onclick="fetchComments()">Fetch comments &amp; run AI sentiment →</button>`:""}
           ${busy?`<span style="font-size:13px;color:#94a3b8">${status}</span>`:""}
           ${comments.length&&!busy?`<span style="font-size:13px;color:#10b981;font-weight:600">✓ ${comments.length} comments${sentiment?" · Sentiment ready":""}</span>`:""}

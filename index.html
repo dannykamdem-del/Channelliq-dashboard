@@ -755,24 +755,23 @@ async function init() {
   } catch(e) {}
 
   sb.auth.onAuthStateChange(async (event, session) => {
+sb.auth.onAuthStateChange(async (event, session) => {
     if (event==="SIGNED_IN" && session) {
       state.user=session.user;
       await loadGoals();
       const h=localStorage.getItem("channeliq_handle");
       if (!h) { state.screen="onboard"; render(); return; }
       state.handle=h;
-      const savedChannel=localStorage.getItem("channeliq_channel");
-      const savedVideos=localStorage.getItem("channeliq_videos");
-      if (savedChannel) {
-        try {
-          state.channel=JSON.parse(savedChannel);
-          state.videos=savedVideos?JSON.parse(savedVideos):[];
-          state.tier=getTier(parseInt(state.channel.statistics?.subscriberCount||0));
-          state.status=state.videos.length?`${state.videos.length} videos loaded ✓`:"";
-          state.screen="dashboard"; state.busy=false; render();
-          scheduleGoalPrompt();
-          return;
-        } catch(_) {}
+      const raw=localStorage.getItem("channeliq_channel");
+      if (raw) {
+        state.channel=JSON.parse(raw);
+        const rawV=localStorage.getItem("channeliq_videos");
+        state.videos=rawV?JSON.parse(rawV):[];
+        state.tier=getTier(parseInt(state.channel.statistics?.subscriberCount||0));
+        state.status=state.videos.length?`${state.videos.length} videos loaded ✓`:"";
+        state.screen="dashboard"; state.busy=false; render();
+        scheduleGoalPrompt();
+        return;
       }
       await loadChannel(h);
     }
@@ -787,7 +786,6 @@ async function init() {
       render();
     }
   });
-}
 
 async function lookup() {
   const input=document.getElementById("handleInput");
@@ -844,10 +842,21 @@ async function loadChannel(handle) {
     state.screen="dashboard"; state.busy=false; render();
     scheduleGoalPrompt();
   } catch(e) {
-    const msg = e.name==="AbortError" ? "Server took too long. Please try again." : e.message||"Connection failed. Please try again.";
+    const raw=localStorage.getItem("channeliq_channel");
+    if (raw) {
+      try {
+        state.channel=JSON.parse(raw);
+        const rawV=localStorage.getItem("channeliq_videos");
+        state.videos=rawV?JSON.parse(rawV):[];
+        state.tier=getTier(parseInt(state.channel.statistics?.subscriberCount||0));
+        state.status="Loaded from cache";
+        state.screen="dashboard"; state.busy=false; render();
+        return;
+      } catch(_) {}
+    }
+    const msg=e.name==="AbortError"?"Server took too long. Please try again.":e.message||"Connection failed.";
     state.error=msg; state.screen="onboard"; render();
   }
-}
 
 async function fetchComments() {
   if (state.busy||!state.videos.length) return;

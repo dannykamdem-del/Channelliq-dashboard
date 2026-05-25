@@ -820,6 +820,7 @@ async function fetchBackground() {
 
 async function signInWithGoogle(remember) {
   if (state.handle) localStorage.setItem("channeliq_handle", state.handle);
+  if (state.channel) localStorage.setItem("channeliq_channel", JSON.stringify(state.channel));
   localStorage.setItem("channeliq_remember", remember ? "true" : "false");
   await sb.auth.signInWithOAuth({ provider:"google", options:{ redirectTo:"https://ytanalyst.netlify.app" } });
 }

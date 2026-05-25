@@ -736,70 +736,21 @@ function resetAll() {
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
-function restoreFromStorage() {
-  // Attempt to restore channel + videos from localStorage
-  try {
-    const savedChannel = localStorage.getItem("channeliq_channel");
-    const savedVideos = localStorage.getItem("channeliq_videos");
-    if (savedChannel) {
-      state.channel = JSON.parse(savedChannel);
-      state.videos = savedVideos ? JSON.parse(savedVideos) : [];
-      state.tier = getTier(parseInt(state.channel.statistics?.subscriberCount||0));
-      state.status = state.videos.length ? `${state.videos.length} videos loaded ✓` : "";
-      return true;
-    }
-  } catch(_) {
-    localStorage.removeItem("channeliq_channel");
-    localStorage.removeItem("channeliq_videos");
-  }
-  return false;
-}
-
 async function init() {
   const savedHandle = localStorage.getItem("channeliq_handle");
   if (savedHandle) state.handle = savedHandle;
-
-  // Show onboard immediately while we check session in background
   state.screen = "onboard";
   render();
-  setupAuthListener();
 
-  // Wait for Supabase to finish processing any OAuth hash in the URL
-  await new Promise(r => setTimeout(r, 400));
-
-  try {
-    const { data:{ session } } = await sb.auth.getSession();
-    if (session && savedHandle) {
-      state.user = session.user;
-      await loadGoals();
-      if (restoreFromStorage()) {
-        state.screen = "dashboard";
-        state.busy = false;
-        render();
-        scheduleGoalPrompt();
-        return;
-      }
-      // Session exists, handle exists, but no cached channel — load it fresh
-      await loadChannel(savedHandle);
-      return;
-    }
-  } catch(e) {}
-}
-
-function setupAuthListener() {
   sb.auth.onAuthStateChange(async (event, session) => {
     if (event==="SIGNED_IN" && session) {
-      state.user=session.user;
+      state.user = session.user;
       await loadGoals();
-      const h=localStorage.getItem("channeliq_handle");
-      if (!h) { state.screen="onboard"; render(); return; }
-      state.handle=h;
-      if (restoreFromStorage()) {
-        state.screen="dashboard"; state.busy=false; render();
-        scheduleGoalPrompt();
-        return;
+      const h = localStorage.getItem("channeliq_handle");
+      if (h) {
+        state.handle = h;
+        await loadChannel(h);
       }
-      await loadChannel(h);
     }
     if (event==="SIGNED_OUT") {
       state.user=null; state.channel=null; state.videos=[];
@@ -807,9 +758,21 @@ function setupAuthListener() {
       state.screen="onboard";
       localStorage.removeItem("channeliq_handle");
       localStorage.removeItem("channeliq_remember");
+      localStorage.removeItem("channeliq_channel");
+      localStorage.removeItem("channeliq_videos");
       render();
     }
   });
+
+  // Check if already signed in (returning user)
+  try {
+    const { data:{ session } } = await sb.auth.getSession();
+    if (session && savedHandle) {
+      state.user = session.user;
+      await loadGoals();
+      await loadChannel(savedHandle);
+    }
+  } catch(e) {}
 }
 
 async function lookup() {
@@ -823,9 +786,7 @@ async function lookup() {
     const d=await r.json();
     if (d.error) { state.error=d.error; state.busy=false; state.screen="onboard"; render(); return; }
     state.channel=d; state.tier=getTier(parseInt(d.statistics?.subscriberCount||0));
-    // Save handle AND channel data so both survive the OAuth redirect
     localStorage.setItem("channeliq_handle", handle);
-    localStorage.setItem("channeliq_channel", JSON.stringify(d));
     state.screen="teaser"; state.busy=false; render(); fetchBackground();
   } catch(e) { state.error="Connection failed. Please try again."; state.busy=false; state.screen="onboard"; render(); }
 }
@@ -843,8 +804,6 @@ async function fetchBackground() {
 
 async function signInWithGoogle(remember) {
   if (state.handle) localStorage.setItem("channeliq_handle", state.handle);
-  if (state.channel) localStorage.setItem("channeliq_channel", JSON.stringify(state.channel));
-  if (state.videos?.length) localStorage.setItem("channeliq_videos", JSON.stringify(state.videos));
   localStorage.setItem("channeliq_remember", remember ? "true" : "false");
   await sb.auth.signInWithOAuth({ provider:"google", options:{ redirectTo:"https://ytanalyst.netlify.app" } });
 }

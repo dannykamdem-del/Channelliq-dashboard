@@ -742,57 +742,22 @@ async function init() {
   if (savedHandle) state.handle = savedHandle;
   state.screen = "onboard";
   render();
+  
+  // Wait a moment for Supabase to process any OAuth hash in URL
+  await new Promise(r => setTimeout(r, 300));
+  
   try {
     const { data:{ session } } = await sb.auth.getSession();
-    if (session) {
+    if (session && savedHandle) {
       state.user = session.user;
       await loadGoals();
-      const h = localStorage.getItem("channeliq_handle");
-      if (h) {
-        state.handle = h;
-        const raw = localStorage.getItem("channeliq_channel");
-        if (raw) {
-          try {
-            state.channel = JSON.parse(raw);
-            const rawV = localStorage.getItem("channeliq_videos");
-            state.videos = rawV ? JSON.parse(rawV) : [];
-            state.tier = getTier(parseInt(state.channel.statistics?.subscriberCount||0));
-            state.status = state.videos.length ? `${state.videos.length} videos loaded ✓` : "";
-            state.screen = "dashboard";
-            state.busy = false;
-            render();
-            scheduleGoalPrompt();
-            return;
-          } catch(_) {}
-        }
-        await loadChannel(h);
-        return;
-      }
-      render();
+      // User is signed in AND has a saved handle - go to dashboard
+      await loadChannel(savedHandle);
+      return;
     }
   } catch(e) {}
+  
   sb.auth.onAuthStateChange(async (event, session) => {
-    if (event==="SIGNED_IN" && session) {
-      state.user=session.user;
-      await loadGoals();
-      const h=localStorage.getItem("channeliq_handle");
-      if (!h) { state.screen="onboard"; render(); return; }
-      state.handle=h;
-      const raw=localStorage.getItem("channeliq_channel");
-      if (raw) {
-        try {
-          state.channel=JSON.parse(raw);
-          const rawV=localStorage.getItem("channeliq_videos");
-          state.videos=rawV?JSON.parse(rawV):[];
-          state.tier=getTier(parseInt(state.channel.statistics?.subscriberCount||0));
-          state.status=state.videos.length?`${state.videos.length} videos loaded ✓`:"";
-          state.screen="dashboard"; state.busy=false; render();
-          scheduleGoalPrompt();
-          return;
-        } catch(_) {}
-      }
-      await loadChannel(h);
-    }
     if (event==="SIGNED_OUT") {
       state.user=null; state.channel=null; state.videos=[];
       state.comments=[]; state.sentiment=null; state.goals=null;

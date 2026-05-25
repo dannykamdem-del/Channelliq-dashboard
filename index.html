@@ -747,6 +747,27 @@ async function init() {
     if (session) {
       state.user = session.user;
       await loadGoals();
+      const h = localStorage.getItem("channeliq_handle");
+      if (h) {
+        state.handle = h;
+        const raw = localStorage.getItem("channeliq_channel");
+        if (raw) {
+          try {
+            state.channel = JSON.parse(raw);
+            const rawV = localStorage.getItem("channeliq_videos");
+            state.videos = rawV ? JSON.parse(rawV) : [];
+            state.tier = getTier(parseInt(state.channel.statistics?.subscriberCount||0));
+            state.status = state.videos.length ? `${state.videos.length} videos loaded ✓` : "";
+            state.screen = "dashboard";
+            state.busy = false;
+            render();
+            scheduleGoalPrompt();
+            return;
+          } catch(_) {}
+        }
+        await loadChannel(h);
+        return;
+      }
       render();
     }
   } catch(e) {}
@@ -759,14 +780,16 @@ async function init() {
       state.handle=h;
       const raw=localStorage.getItem("channeliq_channel");
       if (raw) {
-        state.channel=JSON.parse(raw);
-        const rawV=localStorage.getItem("channeliq_videos");
-        state.videos=rawV?JSON.parse(rawV):[];
-        state.tier=getTier(parseInt(state.channel.statistics?.subscriberCount||0));
-        state.status=state.videos.length?`${state.videos.length} videos loaded ✓`:"";
-        state.screen="dashboard"; state.busy=false; render();
-        scheduleGoalPrompt();
-        return;
+        try {
+          state.channel=JSON.parse(raw);
+          const rawV=localStorage.getItem("channeliq_videos");
+          state.videos=rawV?JSON.parse(rawV):[];
+          state.tier=getTier(parseInt(state.channel.statistics?.subscriberCount||0));
+          state.status=state.videos.length?`${state.videos.length} videos loaded ✓`:"";
+          state.screen="dashboard"; state.busy=false; render();
+          scheduleGoalPrompt();
+          return;
+        } catch(_) {}
       }
       await loadChannel(h);
     }
@@ -782,7 +805,6 @@ async function init() {
     }
   });
 }
-
 async function lookup() {
   const input=document.getElementById("handleInput");
   if (!input) return;

@@ -758,21 +758,22 @@ async function init() {
       state.user=session.user;
       await loadGoals();
       const h=localStorage.getItem("channeliq_handle");
-      if (!h) { state.screen="onboard"; render(); return; }
-      state.handle=h;
-      // If channel already loaded in this session, go straight to dashboard
-      if (state.channel && state.videos.length) {
-        state.screen="dashboard"; state.busy=false; render();
-        scheduleGoalPrompt();
-      } else if (state.backgroundData) {
-        state.channel=state.backgroundData.channel;
-        state.videos=state.backgroundData.videos;
-        state.tier=getTier(parseInt(state.channel.statistics?.subscriberCount||0));
-        state.status=`${state.videos.length} videos loaded ✓`;
-        state.screen="dashboard"; state.busy=false; render();
-        scheduleGoalPrompt();
-      } else {
-        await loadChannel(h);
+if (!h) { state.screen="onboard"; render(); return; }
+state.handle=h;
+const savedChannel=localStorage.getItem("channeliq_channel");
+const savedVideos=localStorage.getItem("channeliq_videos");
+if (savedChannel) {
+  try {
+    state.channel=JSON.parse(savedChannel);
+    state.videos=savedVideos?JSON.parse(savedVideos):[];
+    state.tier=getTier(parseInt(state.channel.statistics?.subscriberCount||0));
+    state.status=state.videos.length?`${state.videos.length} videos loaded ✓`:"";
+    state.screen="dashboard"; state.busy=false; render();
+    scheduleGoalPrompt();
+    return;
+  } catch(_) {}
+}
+await loadChannel(h);
       }
     }
     if (event==="SIGNED_OUT") {
@@ -799,7 +800,8 @@ async function lookup() {
     state.channel=d; state.tier=getTier(parseInt(d.statistics?.subscriberCount||0));
     // Save handle immediately so it survives the OAuth redirect
     localStorage.setItem("channeliq_handle", handle);
-    state.screen="teaser"; state.busy=false; render(); fetchBackground();
+localStorage.setItem("channeliq_channel", JSON.stringify(d));
+state.screen="teaser"; state.busy=false; render(); fetchBackground(); render(); fetchBackground();
   } catch(e) { state.error="Connection failed. Please try again."; state.busy=false; state.screen="onboard"; render(); }
 }
 
@@ -807,7 +809,9 @@ async function fetchBackground() {
   try {
     const r=await fetch(`${SERVER}/videos?channelId=${state.channel.id}`);
     const d=await r.json();
-    state.backgroundData={ channel:state.channel, videos:d.items||[] };
+    const videos=d.items||[];
+    state.backgroundData={ channel:state.channel, videos };
+    localStorage.setItem("channeliq_videos", JSON.stringify(videos));
   } catch(_) {}
 }
 
@@ -817,7 +821,11 @@ async function signInWithGoogle(remember) {
   await sb.auth.signInWithOAuth({ provider:"google", options:{ redirectTo:"https://ytanalyst.netlify.app" } });
 }
 
-async function signOut() { await sb.auth.signOut(); }
+async function async function signOut() {
+  localStorage.removeItem("channeliq_channel");
+  localStorage.removeItem("channeliq_videos");
+  await sb.auth.signOut();
+}
 
 async function loadChannel(handle) {
   state.status="Loading your channel..."; state.screen="loading"; render();

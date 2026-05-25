@@ -737,47 +737,23 @@ function resetAll() {
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
-function restoreFromStorage() {
-  try {
-    const savedChannel = localStorage.getItem("channeliq_channel");
-    const savedVideos = localStorage.getItem("channeliq_videos");
-    if (savedChannel) {
-      state.channel = JSON.parse(savedChannel);
-      state.videos = savedVideos ? JSON.parse(savedVideos) : [];
-      state.tier = getTier(parseInt(state.channel.statistics?.subscriberCount||0));
-      state.status = state.videos.length ? `${state.videos.length} videos loaded ✓` : "";
-      return true;
-    }
-  } catch(_) {
-    localStorage.removeItem("channeliq_channel");
-    localStorage.removeItem("channeliq_videos");
-  }
-  return false;
-}
-
 async function init() {
+  // Always start on onboard — never hang on loading screen
   const savedHandle = localStorage.getItem("channeliq_handle");
   if (savedHandle) state.handle = savedHandle;
-  try {
-    const { data:{ session } } = await sb.auth.getSession();
-    if (session && savedHandle) {
-      state.user = session.user;
-      await loadGoals();
-      if (restoreFromStorage()) {
-        state.screen = "dashboard";
-        render();
-        scheduleGoalPrompt();
-        setupAuthListener();
-        return;
-      }
-    }
-  } catch(e) {}
   state.screen = "onboard";
   render();
-  setupAuthListener();
-}
 
-function setupAuthListener() {
+  // Check session quietly in background
+  try {
+    const { data:{ session } } = await sb.auth.getSession();
+    if (session) {
+      state.user = session.user;
+      await loadGoals();
+      render();
+    }
+  } catch(e) {}
+
   sb.auth.onAuthStateChange(async (event, session) => {
     if (event==="SIGNED_IN" && session) {
       state.user=session.user;
@@ -785,10 +761,18 @@ function setupAuthListener() {
       const h=localStorage.getItem("channeliq_handle");
       if (!h) { state.screen="onboard"; render(); return; }
       state.handle=h;
-      if (restoreFromStorage()) {
-        state.screen="dashboard"; state.busy=false; render();
-        scheduleGoalPrompt();
-        return;
+      const savedChannel=localStorage.getItem("channeliq_channel");
+      const savedVideos=localStorage.getItem("channeliq_videos");
+      if (savedChannel) {
+        try {
+          state.channel=JSON.parse(savedChannel);
+          state.videos=savedVideos?JSON.parse(savedVideos):[];
+          state.tier=getTier(parseInt(state.channel.statistics?.subscriberCount||0));
+          state.status=state.videos.length?`${state.videos.length} videos loaded ✓`:"";
+          state.screen="dashboard"; state.busy=false; render();
+          scheduleGoalPrompt();
+          return;
+        } catch(_) {}
       }
       await loadChannel(h);
     }

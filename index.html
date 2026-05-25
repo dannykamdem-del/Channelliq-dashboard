@@ -738,13 +738,10 @@ function resetAll() {
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 async function init() {
-  // Always start on onboard — never hang on loading screen
   const savedHandle = localStorage.getItem("channeliq_handle");
   if (savedHandle) state.handle = savedHandle;
   state.screen = "onboard";
   render();
-
-  // Check session quietly in background
   try {
     const { data:{ session } } = await sb.auth.getSession();
     if (session) {
@@ -753,9 +750,7 @@ async function init() {
       render();
     }
   } catch(e) {}
-
   sb.auth.onAuthStateChange(async (event, session) => {
-sb.auth.onAuthStateChange(async (event, session) => {
     if (event==="SIGNED_IN" && session) {
       state.user=session.user;
       await loadGoals();
@@ -786,6 +781,7 @@ sb.auth.onAuthStateChange(async (event, session) => {
       render();
     }
   });
+}
 
 async function lookup() {
   const input=document.getElementById("handleInput");
@@ -798,7 +794,6 @@ async function lookup() {
     const d=await r.json();
     if (d.error) { state.error=d.error; state.busy=false; state.screen="onboard"; render(); return; }
     state.channel=d; state.tier=getTier(parseInt(d.statistics?.subscriberCount||0));
-    // Save handle AND channel data so both survive the OAuth redirect
     localStorage.setItem("channeliq_handle", handle);
     localStorage.setItem("channeliq_channel", JSON.stringify(d));
     state.screen="teaser"; state.busy=false; render(); fetchBackground();
@@ -811,7 +806,6 @@ async function fetchBackground() {
     const d=await r.json();
     const videos=d.items||[];
     state.backgroundData={ channel:state.channel, videos };
-    // Save videos to localStorage so they survive OAuth redirect
     localStorage.setItem("channeliq_videos", JSON.stringify(videos));
   } catch(_) {}
 }
@@ -823,7 +817,11 @@ async function signInWithGoogle(remember) {
   await sb.auth.signInWithOAuth({ provider:"google", options:{ redirectTo:"https://ytanalyst.netlify.app" } });
 }
 
-async function signOut() { await sb.auth.signOut(); }
+async function signOut() {
+  localStorage.removeItem("channeliq_channel");
+  localStorage.removeItem("channeliq_videos");
+  await sb.auth.signOut();
+}
 
 async function loadChannel(handle) {
   state.status="Loading your channel..."; state.screen="loading"; render();
@@ -857,6 +855,7 @@ async function loadChannel(handle) {
     const msg=e.name==="AbortError"?"Server took too long. Please try again.":e.message||"Connection failed.";
     state.error=msg; state.screen="onboard"; render();
   }
+}
 
 async function fetchComments() {
   if (state.busy||!state.videos.length) return;

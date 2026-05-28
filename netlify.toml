@@ -1,0 +1,21 @@
+# ChannelIQ Netlify config
+# This site is a single static HTML file with no build step.
+# Telling Netlify not to run any build process keeps each deploy
+# fast (5-10 seconds instead of 30-60) and saves build credits.
+
+[build]
+  # No build command — serve files as-is from the repo root.
+  command = ""
+  # Publish the repo root.
+  publish = "."
+
+[build.environment]
+  # Disable secrets scanning (we don't have any in the static files)
+  SECRETS_SCAN_OMIT_KEYS = "GOOGLE_OAUTH_CLIENT_ID"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
